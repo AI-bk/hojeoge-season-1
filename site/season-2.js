@@ -263,7 +263,12 @@ function disciplinePanels(action){
   if(!action)return '';
   const scenes=disciplineScenes[action.key];
   const slots=action.key==='supervisor'?['S2-08','S2-09']:[];
-  return scenes.map((scene,i)=>panel(...withNew(slots[i]||'',scene))).join('');
+  return scenes.map((scene,i)=>{
+    const drawn=withNew(slots[i]||'',scene);
+    // 열쇠를 넘기는 그림(S2-09)은 관아 장면이라, 궁문에 있는 접수 관원의 말은 그 사람 얼굴 칸으로 뗀다.
+    if(slots[i]==='S2-09'&&drawn[0]==='g')return panel(drawn[0],drawn[1],drawn[2]+' 같은 시각 관아 장부고 앞에서, 문 주부는 허리춤의 열쇠 꾸러미를 풀어 사환에게 넘겼다.')+panel('k',11,null,drawn[3]);
+    return panel(...drawn);
+  }).join('');
 }
 function availableChoices(step,cast,answers=progress.answers){
   const labels=[...turns.choices[step]];
