@@ -221,6 +221,13 @@ function characterPanels(step,cast){
   }
   return '';
 }
+function speakerCut(speaker,step){
+  if(speaker===route.companion)return ['r',route.art+(step<2?0:step<4?4:8)];
+  const fixed={'연이':['n',0],'검문 아전':['n',4],'명선':['n',6],'서겸':['c',1],'하 서리':['c',8],'문지기':['n',13],'인계인':['s',10]};
+  if(fixed[speaker])return fixed[speaker];
+  if(speaker==='이서')return [['n',1],['r',route.art],['s',4],['n',7],['c',5],['n',10],['r',15]][step];
+  return null;
+}
 function disciplinePanels(action){
   if(!action)return '';
   const scenes=disciplineScenes[action.key];
@@ -276,11 +283,17 @@ function travelScene(step){
   const canSpeak=extraLine&&(extraLine[0]==='이서'||step===1||cast.escort==='travel'||cast.escort==='gate');
   const reply=turns.answers[step];
   const followup=canSpeak?panel('e',[3,2,8,11,2,5,9][step],null,reply?[extraLine,reply]:[extraLine]):'';
-  const note=step===1?panel('e',route.art===0?7:route.art===1?8:route.art===2?9:2,'‘'+route.item+'’의 출처를 확인해 줄 사람이나 기록이 필요했다.'):step===7?
+  const note=step===1?panel('e',route.art===0?7:route.art===1?8:route.art===2?9:4,'‘'+route.item+'’의 출처를 확인해 줄 사람이나 기록이 필요했다.'):step===7?
     panel('e',5,'이서가 먼저 맡기기로 한 것은 '+gateFocus[progress.answers[6]][0]+'이다.',[['문지기',gateFocus[progress.answers[6]][1]]]):'';
-  reader.innerHTML='<div class="chapter">시즌 2 · '+(step+1)+' / 8 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(scene.title)+'</h2>'+body+narrativePanels(step)+followup+characterPanels(step,cast)+note+
+  const rankScene=step===1?panel(...departureScenes[inherited.rank]):'';
+  reader.innerHTML='<div class="chapter">시즌 2 · '+(step+1)+' / 8 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(scene.title)+'</h2>'+body+rankScene+narrativePanels(step)+followup+characterPanels(step,cast)+note+
     '<h3 class="question">'+escaped(scene.question)+'</h3>';
   options(availableChoices(step,cast),choose);
+}
+function replyPanel(step,reply){
+  if(!reply)return '';
+  const cut=speakerCut(reply[0],step);
+  return cut?panel(cut[0],cut[1],null,[reply]):'';
 }
 function previousAction(){
   const step=progress.answers.length-1;
@@ -313,10 +326,19 @@ function previousAction(){
   const publicLine=step===3?(option===2?['명선','제가 말한 일은 전해도 돼요. 제가 묵는 곳은 누구에게도 말하지 말아 주세요.']:line):relay;
   const personThere=progress.answers[1]===1;
   const routeCut=route.art+(step<2?0:step<4?4:8);
+  const reply=turns.replies[step][option];
+  const showEffect=step<=2&&personThere;
+  const replyCut=reply&&speakerCut(reply[0],step);
+  const sameCut=showEffect&&replyCut&&replyCut[0]==='r'&&replyCut[1]===routeCut;
   return '<section class="reading-lead" aria-label="방금 고른 행동">'+
     '<h2 tabindex="-1">'+escaped(title)+'</h2>'+
-    panel(choiceScene,choiceCut,specific,[publicLine,turns.replies[step][option]].filter(Boolean))+
-    (step<=2&&personThere?panel('r',routeCut,effect):'')+'</section>';
+    panel(choiceScene,choiceCut,specific,publicLine?[publicLine]:[])+
+    (sameCut?'':replyPanel(step,reply))+
+    (showEffect?panel('r',routeCut,effect,sameCut?[reply]:[]):'')+'</section>';
+}
+function gateMoment(id,record){
+  if(id===2&&record.witness!=='명선')return panel('n',13,'문지기 상 위에 두 사람의 이름이 한 줄로 나란히 적혔다. 누구도 상대의 말을 대신 꺼내지 않았다.');
+  return panel(...gateMoments[id]);
 }
 function finale(){
   const record=gateRecord();
@@ -343,7 +365,7 @@ function finale(){
   const transferred=write('yeocheon-season-three-v1handoff:'+inherited.key,record);
   reader.innerHTML='<div class="chapter">시즌 2 엔딩 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(title)+'</h2>'+
     panel(kind,cut,arrival,[['이서',lead],arrivalEndings[id][4]])+
-    seoEnding+punishment+panel('c',15,doorCaption,[['문 너머의 목소리',doorLine]])+
+    gateMoment(id,record)+seoEnding+punishment+panel('c',15,doorCaption,[['문 너머의 목소리',doorLine]])+
     '<section class="gate-record" aria-label="시즌 2 종료 기록"><p class="chapter">시즌 2 완 · 궁문 바깥</p><h2>궁문 앞에 남긴 기록</h2><dl><dt>이서의 신분</dt><dd>'+escaped(route.rank)+'</dd><dt>문 앞의 상황</dt><dd>'+escaped(material)+'</dd><dt>궁문 밖에 온 사람</dt><dd>'+escaped(record.characters.gatePeople.slice(2).join(' · ')||'이서 홀로 도착')+'</dd>'+
     (record.discipline?'<dt>관아의 처분</dt><dd>'+escaped(record.discipline.person+' · '+record.discipline.sanction)+'</dd>':'')+'</dl>'+
     '<p>시즌 3는 이 문이 열리는 순간부터 시작됩니다.</p>'+(transferred?'<p><a class="link primary" href="season-3.html">시즌 3 이어 읽기</a></p>':'<p class="intro">이 브라우저에 다음 시즌 기록을 저장하지 못했습니다.</p>')+'</section>';
