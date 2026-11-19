@@ -69,7 +69,7 @@ function hasNewCut(slot){return typeof NEW_CUT_SLOTS_3==='object'&&!!NEW_CUT_SLO
 const witnessSlots={'명선':'S3-01','서겸':'S3-02','한 노인':'S3-03','백문재':'S3-04','정윤':'S3-05','박 유모':'S3-06'};
 function extraBuildup(step){
   if(step===2&&hasNewCut('S3-07'))return frame(...newCut('S3-07'),'궁 안 약방. 의관 이현이 약재 서랍 앞에서 이서를 맞았다. 손에는 이미 장부 두 권이 들려 있었다.','이현','약값을 받은 날과 약을 건넨 날은 다른 책에 적혀 있습니다.');
-  if(step===4&&hasNewCut('S3-08'))return frame(...newCut('S3-08'),'밤이 깊었을 때, 등불을 든 사환이 상궁의 처소 문을 두드렸다. 윤석이 그 뒤에서 종이 한 장을 받아 들었다.','윤석','명령은 적혀 있는데, 내린 사람의 수결이 없습니다.');
+  if(step===4&&hasNewCut('S3-08'))return frame(...newCut('S3-08'),'밤이 깊었을 때, 등불을 든 사환이 상궁의 처소 문을 두드렸다. 윤석이 먼저 나와 사환이 내민 종이를 받아 들었고, 최 상궁은 문 안쪽에서 지켜보았다.','윤석','명령은 적혀 있는데, 내린 사람의 수결이 없습니다.');
   return '';
 }
 function heading(chapter,title,level='h1'){
