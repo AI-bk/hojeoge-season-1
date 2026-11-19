@@ -63,15 +63,37 @@ function topic(name){
   const code=name.charCodeAt(name.length-1)-0xac00;
   return name+(code>=0&&code<11172&&code%28?'은':'는');
 }
+function subject(name){
+  const code=name.charCodeAt(name.length-1)-0xac00;
+  return name+(code>=0&&code<11172&&code%28?'이':'가');
+}
 function escaped(value){
   return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
 function art(kind,cut){
   const x=cut%4*100/3;
-  const y=Math.floor(cut/4)*((kind==='n'||kind==='r')?100/3:50);
-  return '<div class="art'+(kind==='e'?' detail':kind==='n'?' narrative':kind==='r'?' route-art':'')+'" data-art="'+kind+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
+  const y=Math.floor(cut/4)*((kind==='n'||kind==='r'||kind==='k')?100/3:50);
+  return '<div class="art'+(kind==='e'?' detail':kind==='n'?' narrative':kind==='r'?' route-art':kind==='k'?' close-art':'')+'" data-art="'+kind+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
+}
+let sceneStep=0;
+function faceCut(speaker){
+  const faces={'연이':0,'하 서리':2,'서겸':3,'명선':4,'검문 아전':6,'사환':10,'인계인':11};
+  const companions={2:1,3:8,4:9,5:7};
+  if(speaker==='이서')return sceneStep<=1||sceneStep===3?15:sceneStep===2?14:sceneStep<=5?12:13;
+  if(route&&speaker===route.companion)return companions[inherited.rank];
+  return faces[speaker]??null;
 }
 function panel(kind,cut,caption,lines=[]){
+  const groups=[[kind,cut,caption,[]]];
+  for(const line of lines){
+    const face=faceCut(line[0]);
+    const last=groups[groups.length-1];
+    if(last[3].length&&face!==null&&!(last[0]==='k'&&last[1]===face))groups.push(['k',face,null,[line]]);
+    else last[3].push(line);
+  }
+  return groups.map(([k,c,cap,ls])=>frame(k,c,cap,ls)).join('');
+}
+function frame(kind,cut,caption,lines=[]){
   return '<figure class="beat">'+art(kind,cut)+'<figcaption>'+(caption?'<p>'+escaped(caption)+'</p>':'')+
     lines.map(([speaker,line])=>'<div class="talk"><strong>'+escaped(speaker)+'</strong><q>'+escaped(line)+'</q></div>').join('')+'</figcaption></figure>';
 }
@@ -188,6 +210,7 @@ function narrativePanels(step){
   return storyPauses[step].filter(([cut])=>cut!==8&&cut!==11).map(([cut,caption,lines])=>panel('n',cut,caption,lines)).join('');
 }
 function opening(){
+  sceneStep=0;
   const body='여천에 살아 있는 연이의 이름이 한양 사망 기록에 올라 있었다. 궁 쪽은 원본을 가져오라고 했다. 그 글과 같은 곳에서, 이름 없이 죽은 아이의 처지를 아는 사람도 찾을 수 있을까.';
   reader.innerHTML='<div class="chapter">시즌 2 · 1 / 8 · '+route.rank+'</div><h1 tabindex="-1">궁문까지</h1>'+
     panel('r',route.art,body,[['이서','연이의 이름을 되찾을 때는 그 아이가 살아 있다는 말을 할 수 있었어. 이번엔 그 이름으로 죽은 아이를 찾아야 해.']])+
@@ -207,9 +230,9 @@ function characterPanels(step,cast){
     const clerk=panel('s',1,...scene.clerkResponse[cast.clerk]);
     const seo=cast.seo==='cooperating'?panel('e',3,...scene.namedSource):cast.seo==='anonymous'?panel('n',9,...scene.unnamedSource):'';
     const escort=cast.escort==='gate'
-      ? panel('r',route.art+8,'동행인은 이서와 함께 궁문으로 가기로 했다. 다른 사람의 몫까지 대신 말해 달라는 부탁은 받지 않았다.',[[route.companion,scene.escortWords[inherited.rank]]])
+      ? panel('r',route.art+8,topic(route.companion)+' 이서와 함께 궁문으로 가기로 했다. 다른 사람의 몫까지 대신 말해 달라는 부탁은 받지 않았다.',[[route.companion,scene.escortWords[inherited.rank]]])
       : cast.escort==='departed'
-        ? panel('r',route.art+8,'궁문으로 향하기 전, 동행인은 그동안 맡았던 일을 이서에게 돌려주고 숙소에 남기로 했다.',[[route.companion,'문 밖까지 갈 준비는 안 됐어. 내가 본 일을 넘길 때는 먼저 내게 알려 줘.']])
+        ? panel('r',route.art+8,'궁문으로 향하기 전, '+topic(route.companion)+' 그동안 맡았던 일을 이서에게 돌려주고 숙소에 남기로 했다.',[[route.companion,'문 밖까지 갈 준비는 안 됐어. 내가 본 일을 넘길 때는 먼저 내게 알려 줘.']])
         : '';
     const punishment=cast.sanction?.key==='clerk'?disciplinePanels(cast.sanction):'';
     return clerk+seo+escort+punishment;
@@ -217,11 +240,13 @@ function characterPanels(step,cast){
   if(step===7){
     const child=cast.myeongseon==='travel'?panel(...scene.gateChild):panel(...scene.gateAlone[cast.myeongseon]);
     const seo=cast.seo==='cooperating'?panel('n',8,...scene.shadow):'';
-    return (cast.escort==='gate'?panel('r',route.art+8,'숙소를 나서기 전 마지막으로, 이서는 동행인이 직접 확인할 수 있는 줄을 다시 펼쳤다.',[[route.companion,'문 앞에서는 내가 직접 본 것만 내 이름으로 말할게.']]):'')+child+seo;
+    return (cast.escort==='gate'?panel('r',route.art+8,'숙소를 나서기 전 마지막으로, 이서는 '+subject(route.companion)+' 직접 확인할 수 있는 줄을 다시 펼쳤다.',[[route.companion,'문 앞에서는 내가 직접 본 것만 내 이름으로 말할게.']]):'')+child+seo;
   }
   return '';
 }
 function speakerCut(speaker,step){
+  const face=faceCut(speaker);
+  if(face!==null)return ['k',face];
   if(speaker===route.companion)return ['r',route.art+(step<2?0:step<4?4:8)];
   const fixed={'연이':['n',0],'검문 아전':['n',4],'명선':['n',6],'서겸':['n',8],'하 서리':['s',1],'문지기':['n',13],'인계인':['s',10]};
   if(fixed[speaker])return fixed[speaker];
@@ -257,6 +282,7 @@ function availableChoices(step,cast,answers=progress.answers){
   return labels;
 }
 function travelScene(step){
+  sceneStep=step;
   const scene=road[step-1];
   const cast=castAt(progress.answers);
   let caption=step===1?route.intro:scene.body;
@@ -297,6 +323,7 @@ function replyPanel(step,reply){
 }
 function previousAction(){
   const step=progress.answers.length-1;
+  sceneStep=step;
   const option=progress.answers[step];
   const [kind,cut,,line,effect]=responses[step][option];
   const cast=castAt(progress.answers.slice(0,step));
@@ -341,6 +368,7 @@ function gateMoment(id,record){
   return panel(...gateMoments[id]);
 }
 function finale(){
+  sceneStep=8;
   const record=gateRecord();
   const id=record.ending;
   const [title,,caption,line]=arrivalEndings[id];
