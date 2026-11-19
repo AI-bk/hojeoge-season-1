@@ -6,8 +6,8 @@
 .route-art{background-image:url(season-2-revisions.webp);background-size:400% 400%}.clue-list dt{color:var(--paper);font-weight:700;margin-top:.6em}.clue-list dd{margin:0 0 .55em}.gate-record{margin:32px auto 16px;padding:clamp(16px,5vw,32px);border:1px solid #937b5c;background:#2a3d34}.gate-record .chapter{margin-top:0}.gate-record dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px}.gate-record dt{color:var(--muted)}.gate-record dd{margin:0;color:var(--paper);font-weight:700}
 .cast-art{background-image:url(season-2-characters.webp);background-size:400% 400%}
 
-/* 광고 칸과 사이트 안내 링크: 결말 아래에서 버튼과 충분히 떨어뜨린다 */
-.ad-slot{margin:56px auto 16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);min-height:120px;max-width:100%}
+/* 광고 칸과 사이트 안내 링크: 페이지 맨 아래, 선택 버튼과 충분히 떨어뜨린다 */
+.ad-slot{margin:72px auto 16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);min-height:120px;max-width:100%}
 .ad-slot::before{content:"광고";display:block;font-size:12px;opacity:.6;margin-bottom:6px}
 .ad-slot[hidden]{display:none}
 .site-links{margin:28px 0 8px;text-align:center;font-size:13px;opacity:.75}

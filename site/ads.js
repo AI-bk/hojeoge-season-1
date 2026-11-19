@@ -1,4 +1,5 @@
-// 결말 화면에서만 광고 한 칸을 보여 준다. 만화 컷과 선택 버튼 사이에는 넣지 않는다.
+// 페이지마다 맨 아래에 광고 한 칸을 둔다. 만화 컷과 선택 버튼 사이에는 넣지 않고,
+// 장면이 바뀔 때 광고를 새로 고치지 않는다(페이지당 한 번만 요청).
 (function(){
   var cfg=window.HOJEOGE_ADS||{};
   var client=/^ca-pub-\d{10,20}$/.test(cfg.client||'')?cfg.client:'';
@@ -8,27 +9,16 @@
   s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+client;
   document.head.appendChild(s);
   var slotId=/^\d{6,20}$/.test(cfg.slot||'')?cfg.slot:'';
-  var reader=document.getElementById('reader');
   var box=document.getElementById('ad-slot');
-  if(!slotId||!reader||!box)return;
-  var endings='.final-record,.gate-record,.verdict';
-  var filled=false;
-  function update(){
-    var atEnding=!!reader.querySelector(endings);
-    box.hidden=!atEnding;
-    if(atEnding&&!filled){
-      filled=true;
-      var ins=document.createElement('ins');
-      ins.className='adsbygoogle';
-      ins.style.display='block';
-      ins.setAttribute('data-ad-client',client);
-      ins.setAttribute('data-ad-slot',slotId);
-      ins.setAttribute('data-ad-format','auto');
-      ins.setAttribute('data-full-width-responsive','true');
-      box.appendChild(ins);
-      try{(window.adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}
-    }
-  }
-  new MutationObserver(update).observe(reader,{childList:true});
-  update();
+  if(!slotId||!box)return;
+  box.hidden=false;
+  var ins=document.createElement('ins');
+  ins.className='adsbygoogle';
+  ins.style.display='block';
+  ins.setAttribute('data-ad-client',client);
+  ins.setAttribute('data-ad-slot',slotId);
+  ins.setAttribute('data-ad-format','auto');
+  ins.setAttribute('data-full-width-responsive','true');
+  box.appendChild(ins);
+  try{(window.adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}
 })();

@@ -34,8 +34,8 @@ h2{font-size:clamp(1.5rem,6vw,2.5rem)}
 .verdict dl{margin:0 0 1em;display:grid;grid-template-columns:auto 1fr;gap:5px 12px}.verdict dt{color:var(--dim)}.verdict dd{margin:0}
 .link{display:inline-block;text-decoration:none}.intro{color:var(--dim)}
 
-/* 광고 칸과 사이트 안내 링크: 결말 아래에서 버튼과 충분히 떨어뜨린다 */
-.ad-slot{margin:56px auto 16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);min-height:120px;max-width:100%}
+/* 광고 칸과 사이트 안내 링크: 페이지 맨 아래, 선택 버튼과 충분히 떨어뜨린다 */
+.ad-slot{margin:72px auto 16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);min-height:120px;max-width:100%}
 .ad-slot::before{content:"광고";display:block;font-size:12px;opacity:.6;margin-bottom:6px}
 .ad-slot[hidden]{display:none}
 .site-links{margin:28px 0 8px;text-align:center;font-size:13px;opacity:.75}
