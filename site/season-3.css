@@ -18,6 +18,7 @@ h2{font-size:clamp(1.5rem,6vw,2.5rem)}
 .picture{position:absolute;inset:0 0 auto;width:100%;aspect-ratio:1;background-repeat:no-repeat}
 .scene-picture{background-image:url(season-3-scenes.webp);background-size:300% 300%}
 .reaction-picture{background-image:url(season-3-reactions.webp);background-size:400% 400%}
+.new-picture{background-image:url(season-3-new.webp);background-size:400% 400%}
 .frame-body{position:relative;display:grid;gap:9px;padding:14px clamp(12px,4vw,24px) 16px;background:linear-gradient(180deg,transparent 0,#1e1714ab 28%,#1e1714 96%)}
 .frame.decision{padding-top:57%}.frame.narrative{padding-top:64%}
 .decision .frame-body{background:linear-gradient(180deg,transparent 0,#1e1714ac 20%,#1e1714 98%)}

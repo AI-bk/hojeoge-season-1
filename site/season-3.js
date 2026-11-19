@@ -56,9 +56,21 @@ function frame(sheet,cut,caption,speaker,line,actionClass='narrative'){
   const size=sheet==='s'?3:4;
   const x=(cut%size)*100/(size-1);
   const y=Math.floor(cut/size)*100/(size-1);
-  const art='<div class="picture '+(sheet==='s'?'scene':'reaction')+'-picture" data-cut="'+sheet+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
+  const art='<div class="picture '+(sheet==='s'?'scene':sheet==='g'?'new':'reaction')+'-picture" data-cut="'+sheet+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
   const words=speaker&&line?'<p class="speech"><strong>'+text(speaker)+'</strong><q>'+text(line)+'</q></p>':'';
   return '<section class="frame '+actionClass+'">'+art+'<div class="frame-body">'+(caption?'<p class="frame-caption">'+text(caption)+'</p>':'')+words+'</div></section>';
+}
+// ChatGPT로 새로 그린 컷(season-3-new.webp, 'g'). 없으면 원래 그림을 쓴다.
+function newCut(slot,sheet,cut){
+  const slots=typeof NEW_CUT_SLOTS_3==='object'&&NEW_CUT_SLOTS_3?NEW_CUT_SLOTS_3:{};
+  return slot in slots?['g',slots[slot]]:[sheet,cut];
+}
+function hasNewCut(slot){return typeof NEW_CUT_SLOTS_3==='object'&&!!NEW_CUT_SLOTS_3&&slot in NEW_CUT_SLOTS_3;}
+const witnessSlots={'명선':'S3-01','서겸':'S3-02','한 노인':'S3-03','백문재':'S3-04','정윤':'S3-05','박 유모':'S3-06'};
+function extraBuildup(step){
+  if(step===2&&hasNewCut('S3-07'))return frame(...newCut('S3-07'),'궁 안 약방. 의관 이현이 약재 서랍 앞에서 이서를 맞았다. 손에는 이미 장부 두 권이 들려 있었다.','이현','약값을 받은 날과 약을 건넨 날은 다른 책에 적혀 있습니다.');
+  if(step===4&&hasNewCut('S3-08'))return frame(...newCut('S3-08'),'밤이 깊었을 때, 등불을 든 사환이 상궁의 처소 문을 두드렸다. 윤석이 그 뒤에서 종이 한 장을 받아 들었다.','윤석','명령은 적혀 있는데, 내린 사람의 수결이 없습니다.');
+  return '';
 }
 function heading(chapter,title,level='h1'){
   return '<p class="chapter">'+text(chapter)+'</p><'+level+' tabindex="-1">'+text(title)+'</'+level+'>';
@@ -97,7 +109,7 @@ function nameKnown(){
 function branchCut(step){
   const a=progress.answers;
   if(step===2&&a[1]===2)return frame('r',4,'약방에 갈 때까지 원장은 상궁에게, 사본은 이서에게 있었다. 윤석은 두 봉투를 한 사람에게 주지 않았다.');
-  if(step===2&&a[1]===1)return frame('r',6,'이현는 윤석이 자기 이름으로 남긴 대조 기록을 보고 나서야 진료 날짜를 보여 주었다.');
+  if(step===2&&a[1]===1)return frame('r',6,'이현은 윤석이 자기 이름으로 남긴 대조 기록을 보고 나서야 진료 날짜를 보여 주었다.');
   if(step===4&&nameKnown())return frame('r',9,'이서는 처음 들은 이름을 속으로 되뇌었다. 채령의 진술과 장부에서 발견된 날짜가 그 이름과 이어지는지 더 확인해야 했다.','이서','난희. 그 이름을 문서에 올릴 근거부터 모으자.');
   if(step===5){
     const action=handoff.discipline?.key;
@@ -136,7 +148,7 @@ function decision(step){
   const childVisible=handoff.characters?.myeongseon==='travel'||handoff.witness==='명선';
   const image=step===0&&!childVisible?1:act.image;
   const line=step===0?(handoff.witness?'이 증인을 누가 데려왔느냐?':'이 기록을 가지고 온 사람이 너냐?'):act.line;
-  const buildup=step===0?buildIntro():(act.buildup??[]).map(cut=>frame(...cut)).join('')+branchCut(step);
+  const buildup=step===0?buildIntro():extraBuildup(step)+(act.buildup??[]).map(cut=>frame(...cut)).join('')+branchCut(step);
   reader.innerHTML=heading('시즌 3 · '+rankStories[handoff.rank][0],step===0?'문 안의 이름':act.title)+buildup+frame('s',image,'',act.speaker,line,'decision');
   const options=document.createElement('div');
   options.className='choices';
@@ -154,7 +166,7 @@ function reaction(step,pick){
   if(step===0&&pick===1&&handoff.witness){
     const words=handoff.witness==='명선'?'제가 들은 이름은 말할 수 있어요. 누구나 제 말을 다 읽을 수 있는 건지 먼저 알려 주세요.':handoff.witness==='서겸'?'제가 그 봉투를 받은 방은 압니다. 안에 든 글을 제가 쓴 건 아닙니다.':'제가 여천에서 직접 본 일부터 제 이름으로 말하겠습니다.';
     const next=frame('r',0,'최 상궁이 그 사람을 향해 몸을 돌렸다.','최 상궁','좋다. 이름과 네가 직접 본 일을 따로 받겠다.');
-    reader.innerHTML=heading('방금 고른 행동',optionsFor(step)[pick])+frame('r',3,caption,handoff.witness,words)+next;
+    reader.innerHTML=heading('방금 고른 행동',optionsFor(step)[pick])+frame(...newCut(witnessSlots[handoff.witness]||'','r',3),caption,handoff.witness,words)+next;
   }else{
     if(step===0&&!handoff.witness&&pick===0){
       line='네가 이 종이를 가져왔다는 말은 적어 두겠다. 누가 직접 봤는지는 장부를 연 뒤에 다시 묻는다.';
@@ -192,7 +204,9 @@ function ending(){
       ? frame('r',6,'판관은 하 서리가 옮긴 줄과 달라진 날짜를 대조하라고 했다. 필사 금지는 남았지만, 다음 심리에서는 하 서리도 직접 부르기로 했다.')
       : '';
   const responsibility=examined?'날짜를 고친 수결은 별도 조사에 넘어갔다.':progress.answers[6]===1?'서로 다른 증언이 다음 조회의 질문으로 남았다.':'원본과 진술은 별개의 봉인으로 보관됐다.';
-  reader.innerHTML=heading('시즌 3 완 · '+rankStories[handoff.rank][0],title)+frame('r',13,caption,'이서',line)+remedy+frame('s',8,'해가 뜨자 궁문 바깥까지 발소리가 들렸다. '+responsibility)+
+  const closing={record:['S3-09','기록관이 연이의 줄과 그 옆줄을 나란히 그었다. 옆줄에는 처음으로 다른 아이의 이름이 들어갔다.'],voices:['S3-10','해가 오르는 마당에 그날 말한 사람들이 서 있었다. 누구도 남의 말을 대신하지 않았다.'],seal:['S3-11','두 봉투는 서로 닿지 않게 놓였다. 하나는 오늘 열렸고, 하나는 약속한 날까지 닫혀 있다.'],pending:['S3-12','판관이 남긴 빈 줄 앞에서 이서는 붓을 들지 않았다. 비워 둔 것도 기록이라고 여겼다.']}[outcome];
+  const closingFrame=hasNewCut(closing[0])?frame(...newCut(closing[0]),closing[1]):'';
+  reader.innerHTML=heading('시즌 3 완 · '+rankStories[handoff.rank][0],title)+frame('r',13,caption,'이서',line)+closingFrame+remedy+frame('s',8,'해가 뜨자 궁문 바깥까지 발소리가 들렸다. '+responsibility)+
     '<section class="verdict"><h2>궁에 남은 기록</h2><dl><dt>이서의 신분</dt><dd>'+text(rankStories[handoff.rank][0])+'</dd><dt>기록의 결말</dt><dd>'+text(title)+'</dd></dl></section>';
   reader.querySelector('.verdict').append(button('다른 선택으로 다시 읽기',()=>saveChange(()=>{
     progress={answers:[],reaction:false};
