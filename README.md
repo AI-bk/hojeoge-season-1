@@ -24,6 +24,7 @@ python -m http.server 8000 --directory site
 | `site/ads-config.js`, `site/ads.js` | AdSense 설정과 광고 칸. 게시자 ID(`client`)가 비어 있으면 광고 코드를 불러오지 않음. 광고는 각 페이지 맨 아래 `#ad-slot`에 한 칸, 장면이 바뀌어도 다시 요청하지 않음 |
 | `user-site/` | 배포되지 않음. `AI-bk.github.io` 저장소에 올릴 `ads.txt`와 이동 페이지 |
 | `site/season-2-closeups.webp` | 시즌 2 수채 그림에서 잘라 만든 인물 얼굴 클로즈업 16칸. 대사를 말하는 사람 칸에 씀 |
+| `site/season-2-new.webp`, `tools/build-new-cuts.py` | ChatGPT로 새로 그린 수채 컷(S2-01~S2-10). 원본 PNG는 구글 드라이브 「호적에 없는 봄/시즌2」에 두고, `python3 tools/build-new-cuts.py <폴더>`로 4×4 그림 파일을 다시 만듦 |
 | `site/season-2-characters.webp` | 사실적인 인물 컷. 시즌 3용 그림체라 시즌 2에서는 쓰지 않음 |
 | `site/*.webp`, `site/audio/*.mp3` | 실행에 쓰는 이미지와 음악. 여러 컷이 한 이미지에 배치돼 있는 파일은 CSS와 JS의 배열 좌표를 함께 확인 |
 | `reference/season-3-choice-preview.webp` | 사용자가 승인한 사극 드라마 스타일과 모바일 선택창 예시 이미지 |

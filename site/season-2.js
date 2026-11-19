@@ -72,8 +72,8 @@ function escaped(value){
 }
 function art(kind,cut){
   const x=cut%4*100/3;
-  const y=Math.floor(cut/4)*((kind==='n'||kind==='r'||kind==='k')?100/3:50);
-  return '<div class="art'+(kind==='e'?' detail':kind==='n'?' narrative':kind==='r'?' route-art':kind==='k'?' close-art':'')+'" data-art="'+kind+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
+  const y=Math.floor(cut/4)*((kind==='n'||kind==='r'||kind==='k'||kind==='g')?100/3:50);
+  return '<div class="art'+(kind==='e'?' detail':kind==='n'?' narrative':kind==='r'?' route-art':kind==='k'?' close-art':kind==='g'?' new-art':'')+'" data-art="'+kind+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
 }
 let sceneStep=0;
 function faceCut(speaker){
@@ -304,7 +304,7 @@ function travelScene(step){
   const routeShot=step===1||((step===2||step===5)&&cast.escort==='travel');
   const soloCuts={4:['n',10],5:['s',7],6:['r',15],7:['s',11]};
   const [kind,cut]=step===4&&cast.myeongseon==='travel'?['s',5]:solo?soloCuts[step]:routeShot?['r',route.art+(step===1?0:step===2?4:8)]:['s',scene.art];
-  const body=panel(kind,cut,caption,lines);
+  const body=(step===3?panel(...newCuts.stationKitchen):'')+panel(kind,cut,caption,lines);
   const extraLine=turns.arrivals[step];
   const canSpeak=extraLine&&(extraLine[0]==='이서'||step===1||cast.escort==='travel'||cast.escort==='gate');
   const reply=turns.answers[step];

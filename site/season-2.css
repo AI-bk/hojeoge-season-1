@@ -3,6 +3,7 @@
 .narrative{background-image:url(story-pauses.webp);background-size:400% 400%}
 .reading-lead{margin-bottom:28px}
 
+.new-art{background-image:url(season-2-new.webp);background-size:400% 400%}
 .close-art{background-image:url(season-2-closeups.webp);background-size:400% 400%}
 .route-art{background-image:url(season-2-revisions.webp);background-size:400% 400%}.clue-list dt{color:var(--paper);font-weight:700;margin-top:.6em}.clue-list dd{margin:0 0 .55em}.gate-record{margin:32px auto 16px;padding:clamp(16px,5vw,32px);border:1px solid #937b5c;background:#2a3d34}.gate-record .chapter{margin-top:0}.gate-record dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px}.gate-record dt{color:var(--muted)}.gate-record dd{margin:0;color:var(--paper);font-weight:700}
 
