@@ -59,6 +59,10 @@ function syncScore(){
   if(score.paused)score.play().then(updateScore).catch(updateScore);
 }
 
+function topic(name){
+  const code=name.charCodeAt(name.length-1)-0xac00;
+  return name+(code>=0&&code<11172&&code%28?'은':'는');
+}
 function escaped(value){
   return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
@@ -160,7 +164,7 @@ function clueNotebook(){
   if(progress.answers.length>=5)facts.push(['돌아가라는 편지','연이 쪽 기록을 고쳐 주겠다고 했지만 한양에서 그 이름을 썼던 아이에 관한 답은 없었다.']);
   const sanction=disciplinaryAction(progress.answers);
   if(sanction)facts.push(['관아의 처분',sanction.person+' · '+sanction.sanction]);
-  if(progress.answers.length>=6)facts.push(['지급 기록','사망일 뒤에도 같은 이름으로 지급이 계속됐다. 누가 받아 갔는지는 궁 쪽 기록에서 확인해야 한다.']);
+  if(progress.answers.length>=6)facts.push(turns.clue);
   return '<details><summary>이서가 확인한 단서</summary><dl class="clue-list">'+facts.map(([label,fact])=>'<dt>'+escaped(label)+'</dt><dd>'+escaped(fact)+'</dd>').join('')+'</dl></details>';
 }
 function handoff(){
@@ -234,7 +238,10 @@ function availableChoices(step,cast,answers=progress.answers){
         : '맡겨 둔 진술을 확인하고, 서겸에게도 직접 본 일을 묻는다';
     labels[2]+=' · 답은 공식 문서로 받는다';
   }
+  if(step===3)labels[0]+=' · 명선은 진술만 맡기고 역참에 남는다';
+  if(step===5&&cast.escort==='travel'){const stays=' · '+topic(route.companion)+' 숙소에 남는다';labels[0]+=stays;labels[2]+=stays;}
   if(step===5&&cast.escort!=='travel'&&cast.myeongseon!=='travel')labels[1]='맡겨 둔 진술의 범위를 확인하고 증인을 기다린다';
+  else if(step===5&&cast.escort!=='travel')labels[1]='명선과 각자 직접 본 일부터 말할지 정한다';
   if(step===6&&cast.escort!=='gate'&&cast.myeongseon!=='travel')labels[1]='궁문에서 증인을 기다릴 자리를 정한다';
   if(step===7&&cast.seo==='cooperating'){
     labels[1]+=' · 서겸에게도 근처에서 기다려 달라고 한다';
@@ -254,8 +261,10 @@ function travelScene(step){
   if(step===6&&cast.myeongseon!=='travel'){
     lines=[['이서','명선이 남긴 말과 오늘 문 앞에 서는 사람이 직접 본 일을 섞지 말자.']];
   }
-  if(step===5&&cast.myeongseon!=='travel'){
-    caption='도성에 도착한 이서는 검문소 종이와 여천 기록, 명선이 맡긴 진술을 한 상에 놓는다.';
+  if(step===5){
+    lines=[['이서',turns.cityLine]];
+    if(cast.myeongseon==='travel')lines.push(['명선','그 애가 한양에서 불린 날도 그 종이들 사이 어딘가에 있겠네요. 찾으면 저한테도 먼저 보여 주세요.']);
+    else caption='도성에 도착한 이서는 검문소 종이와 여천 기록, 명선이 맡긴 진술을 한 상에 놓는다.';
   }
   const childAbsent=cast.myeongseon!=='travel';
   const solo=childAbsent&&(step===4||step===5||step===6||step===7);
@@ -265,7 +274,8 @@ function travelScene(step){
   const body=panel(kind,cut,caption,lines);
   const extraLine=turns.arrivals[step];
   const canSpeak=extraLine&&(extraLine[0]==='이서'||step===1||cast.escort==='travel'||cast.escort==='gate');
-  const followup=canSpeak?panel('e',[3,2,8,11,2,5,9][step],null,[extraLine]):'';
+  const reply=turns.answers[step];
+  const followup=canSpeak?panel('e',[3,2,8,11,2,5,9][step],null,reply?[extraLine,reply]:[extraLine]):'';
   const note=step===1?panel('e',route.art===0?7:route.art===1?8:route.art===2?9:2,'‘'+route.item+'’의 출처를 확인해 줄 사람이나 기록이 필요했다.'):step===7?
     panel('e',5,'이서가 먼저 맡기기로 한 것은 '+gateFocus[progress.answers[6]][0]+'이다.',[['문지기',gateFocus[progress.answers[6]][1]]]):'';
   reader.innerHTML='<div class="chapter">시즌 2 · '+(step+1)+' / 8 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(scene.title)+'</h2>'+body+narrativePanels(step)+followup+characterPanels(step,cast)+note+
@@ -289,6 +299,8 @@ function previousAction(){
   }
   if(step===5&&option===1&&cast.escort!=='travel'&&cast.myeongseon!=='travel'){
     specific='이서는 맡겨 둔 진술에서 공개해도 된다는 줄에만 표시했다. 궁문에서 남의 말에 자기 수결을 달지 않기로 했다.';
+  }else if(step===5&&option===1&&cast.escort!=='travel'){
+    specific='명선은 자기가 직접 들은 이름과 본 방까지만 말하기로 했다. 함께 오지 않은 사람의 몫은 이서가 대신 전하지 않는다.';
   }else if(progress.answers[3]===2&&step===5&&option===1){
     specific='명선은 안전한 곳에 남았다. 이서는 그의 쪽지를 봉해 둔 뒤, 동행할 사람이 직접 본 일만 문지기에게 설명할 수 있도록 따로 적었다.';
   }
@@ -303,7 +315,7 @@ function previousAction(){
   const routeCut=route.art+(step<2?0:step<4?4:8);
   return '<section class="reading-lead" aria-label="방금 고른 행동">'+
     '<h2 tabindex="-1">'+escaped(title)+'</h2>'+
-    panel(choiceScene,choiceCut,specific,publicLine?[publicLine]:[])+
+    panel(choiceScene,choiceCut,specific,[publicLine,turns.replies[step][option]].filter(Boolean))+
     (step<=2&&personThere?panel('r',routeCut,effect):'')+'</section>';
 }
 function finale(){
@@ -312,7 +324,8 @@ function finale(){
   const [title,,caption,line]=arrivalEndings[id];
   const [doorCaption,doorLine]=doorThreads[id];
   let arrival=caption;
-  if(id===3&&record.witness)arrival=record.witness+'도 함께 왔지만 문지기는 이서의 이름만 먼저 확인했다. 두 사람은 진술을 별도로 확인받기 위해 돌턱에 앉았다.';
+  let lead=line;
+  if(id===3&&record.witness){arrival=record.witness+'도 함께 왔지만 문지기는 이서의 이름만 먼저 확인했다. 두 사람은 진술을 별도로 확인받기 위해 돌턱에 앉았다.';lead='함께 온 사람의 진술은 따로 확인받겠습니다. 부르실 때까지 여기서 같이 기다리겠어요.';}
   if(id===2)arrival=record.witness+'도 자기 이름으로 진술하겠다고 했다. 문지기가 두 이름을 같은 줄에 적었다.';
   const pictures=[['r',12],['r',12],record.witness==='명선'?['c',12]:['r',route.art+8],['c',record.characters.myeongseon==='travel'?12:13],['e',5],['c',13]];
   const seoEnding=record.characters.seo==='gate-shadow'
@@ -329,7 +342,7 @@ function finale(){
       : record.accepted?'인계할 사람이 도착함':'인계할 사람을 기다림';
   const transferred=write('yeocheon-season-three-v1handoff:'+inherited.key,record);
   reader.innerHTML='<div class="chapter">시즌 2 엔딩 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(title)+'</h2>'+
-    panel(kind,cut,arrival,[['이서',line]])+
+    panel(kind,cut,arrival,[['이서',lead],arrivalEndings[id][4]])+
     seoEnding+punishment+panel('c',15,doorCaption,[['문 너머의 목소리',doorLine]])+
     '<section class="gate-record" aria-label="시즌 2 종료 기록"><p class="chapter">시즌 2 완 · 궁문 바깥</p><h2>궁문 앞에 남긴 기록</h2><dl><dt>이서의 신분</dt><dd>'+escaped(route.rank)+'</dd><dt>문 앞의 상황</dt><dd>'+escaped(material)+'</dd><dt>궁문 밖에 온 사람</dt><dd>'+escaped(record.characters.gatePeople.slice(2).join(' · ')||'이서 홀로 도착')+'</dd>'+
     (record.discipline?'<dt>관아의 처분</dt><dd>'+escaped(record.discipline.person+' · '+record.discipline.sanction)+'</dd>':'')+'</dl>'+
