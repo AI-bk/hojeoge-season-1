@@ -8,15 +8,17 @@ import sys, os
 from PIL import Image, ImageOps
 
 SLOTS2 = {'S2-01':0,'S2-02':1,'S2-03':2,'S2-04':3,'S2-05':4,'S2-06a':5,'S2-06b':6,'S2-06c':7,
-         'S2-06d':8,'S2-07':9,'S2-08':10,'S2-09':11,'S2-10':12}
-SLOTS3 = {'S3-%02d' % i: i-1 for i in range(1, 13)}
+         'S2-06d':8,'S2-07':9,'S2-08':10,'S2-09':11,'S2-10':12,'S2-11':13,'S2-12':14}
+SLOTS1 = {'S1-%02d' % i: i-1 for i in range(1, 16)}
+SLOTS3 = {'S3-%02d' % i: i-1 for i in range(1, 20)}
 CELL = 400
 src = sys.argv[1]
 season = int(sys.argv[2]) if len(sys.argv) > 2 else 2
-SLOTS = SLOTS3 if season == 3 else SLOTS2
-varname = 'NEW_CUT_SLOTS_3' if season == 3 else 'NEW_CUT_SLOTS'
+SLOTS = {1: SLOTS1, 2: SLOTS2, 3: SLOTS3}[season]
+varname = {1: 'NEW_CUT_SLOTS_1', 2: 'NEW_CUT_SLOTS', 3: 'NEW_CUT_SLOTS_3'}[season]
+ROWS = 5 if season == 3 else 4  # 시즌 3는 칸이 19개라 4x5
 root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'site')
-out = Image.new('RGB', (4*CELL, 4*CELL), (23, 38, 36))
+out = Image.new('RGB', (4*CELL, ROWS*CELL), (23, 38, 36))
 found = []
 for name, slot in SLOTS.items():
     path = os.path.join(src, name + '.png')

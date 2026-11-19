@@ -71,3 +71,6 @@ header {
 .ad-slot[hidden]{display:none}
 .site-links{margin:28px 0 8px;text-align:center;font-size:13px;opacity:.75}
 .site-links a{color:inherit}
+
+/* ChatGPT로 새로 그린 시즌 1 수채 컷 (season-1-new.webp, 4x4) */
+.s1-new-art{width:100%;aspect-ratio:1;align-self:start;background:url(season-1-new.webp) no-repeat;background-size:400% 400%}

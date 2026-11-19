@@ -359,6 +359,33 @@ function seasonTeaser(){
     '<div class="dialogue-cut"><div class="teaser-art second" role="img" aria-label="이서와 연이가 사망 기록을 보는 모습"></div><p class="teaser-caption">종이에는 고을과 이름, 태어난 날이 모두 맞았다. 마지막 줄에는 연이가 시월 스무 날 죽었다고 적혀 있었다.</p>'+dialogue('연이','스무 날엔 저 여기 있었잖아요. 그러면 제 이름으로 죽은 사람은 누구예요?')+'</div></div>'+
     '<p class="teaser-final">문서의 끝에는 궁에 들인 아이들의 명부를 대조하러 한양으로 오라고 쓰여 있었다.</p></section>';
 }
+// 새로 그린 컷(season-1-new.webp). 칸이 있으면 그림을, 없으면 빈 문자열을 돌려준다.
+function newArt1(slot){
+  const slots=typeof NEW_CUT_SLOTS_1==='object'&&NEW_CUT_SLOTS_1?NEW_CUT_SLOTS_1:{};
+  if(!(slot in slots))return '';
+  const cut=slots[slot];
+  return '<div class="s1-new-art" data-new-art="'+slot+'" aria-hidden="true" style="background-position:'+(cut%4*100/3)+'% '+(Math.floor(cut/4)*100/3)+'%"></div>';
+}
+// 마지막 장면 12가지에 덧붙이는 컷의 해설. 순서는 S1-01~S1-12.
+const endingNewCuts=[
+  [0,0,'단오는 같은 방 구석에 그릇 두 개를 나란히 놓았다. 창살 너머로 저녁 빛이 들었다.'],
+  [1,0,'첫 배가 물살을 가르자 옥례가 노를 이서에게 넘겼다. 나루에 선 사람들이 손을 흔들었다.'],
+  [1,2,'관아 마루에 짐 목록 두 장이 나란히 놓였다. 소복이 아이들이 내린 쪽 종이를 손끝으로 짚었다.'],
+  [2,0,'물 빠진 밭에 이서와 이웃이 나란히 섰다. 두 집 사이 고랑에 새 말뚝이 박혔다.'],
+  [2,2,'제방 아래 농가 마당마다 정정된 종이가 한 장씩 돌아갔다. 노인 하나가 종이를 접어 품에 넣었다.'],
+  [3,0,'약방 첫 장부 맨 앞에 이서가 옛 기록을 고친 줄을 썼다. 문재가 옆에서 먹을 갈았다.'],
+  [3,2,'마당에 모인 농가 사람들 앞에서 이서가 지급 내역을 한 줄씩 읽었다. 사람들이 차례로 손을 들었다.'],
+  [4,0,'사랑채 문이 활짝 열렸다. 문밖에서 망설이던 아이가 이서가 내준 자리에 앉았다.'],
+  [4,2,'문중 족보 옆에 사랑채 가족의 진술이 함께 펼쳐졌다. 이서가 두 종이가 겹치지 않게 나란히 눌러 두었다.'],
+  [5,0,'위패 앞에 술잔과 편지가 놓였다. 박 유모가 이서 곁에 앉아 편지의 접힌 자리를 폈다.'],
+  [5,1,'열쇠를 받은 소복은 문턱에 앉아 연이를 기다렸다. 이서는 마당에서 그 모습을 지켜보았다.'],
+  [5,2,'조사관의 상 앞에서 이서가 별채의 구휼곡 장부를 펼쳤다. 조사관은 붓을 내려놓고 들었다.']
+];
+function endingNewBeat(){
+  const index=endingNewCuts.findIndex(([rank,ending])=>rank===state.rank&&ending===state.ending);
+  const art=index<0?'':newArt1('S1-'+String(index+1).padStart(2,'0'));
+  return art?'<div class="comic-flow ending-flow">'+beat(art,endingNewCuts[index][2])+'</div>':'';
+}
 function beat(art,caption,lines=[],after=''){
   return '<section class="comic-beat">'+art+'<div class="beat-text">'+(caption?'<p>'+caption+'</p>':'')+
     lines.map(([speaker,line])=>dialogue(speaker,line)).join('')+(after?'<p class="beat-transition">'+after+'</p>':'')+'</div></section>';
@@ -483,7 +510,9 @@ function interludeMarkup(){
   const dutyHandoff=from>=6&&delta!==0&&!localPair&&stage<5
     ? beat(auditArt(2),'판관은 그 기록을 오늘 벌어진 일과 별도로 확인했다.')
     : '';
-  const middle=additions.map(([type,art,description,speech])=>beat(pacedArt(type,art),description,[speech])).join('');
+  const finalHearing=from>=6&&stage===7&&(delta===0||delta>0)?newArt1(delta===0?'S1-14':'S1-15'):'';
+  const hearingCaption=delta===0?'소복이 서기 앞으로 나와 연이의 이름을 또박또박 댔다. 이서는 거둔 청원서를 품에 넣고 그 뒤에 섰다.':'두 증인이 차례로 판관 앞에 불려 나왔다. 판관은 두 사람이 말한 날짜를 고친 기록 옆에 나란히 적었다.';
+  const middle=(finalHearing?beat(finalHearing,hearingCaption):'')+additions.map(([type,art,description,speech])=>beat(pacedArt(type,art),description,[speech])).join('');
   const people=[...lines,...additions.map(entry=>entry[3])].map(([name])=>name);
   return '<div class="chapter">여천 이야기</div><h2 tabindex="-1">'+title+'</h2>'+castList(people)+
     '<div class="comic-flow branch-scene">'+beat(pacedArt(kind,cut),caption,first)+dutyHandoff+middle+beat(evidencePicture(nextEvidence),null,answer,finding)+'</div>';
@@ -584,7 +613,9 @@ function specialEnding(){
   if(state.ending===0)return survivalEnding();
   const body=beat(auditArt(1),'이서는 함을 붙들고 돌아서려 했다. 옥례가 던진 밧줄이 손끝에서 멀어지고 갑판이 갈라졌다.',[['옥례','이서야!']])+
     beat(lateCaseArt(2),'이튿날, 빈 나루에는 젖은 밧줄만 남았다. 이서는 돌아오지 못했다. 갈대 사이에서 연이의 이름이 적힌 종이 한 조각이 발견됐다.',[['옥례','이름은 찾았어. 이 이름을 여기서 끝내지는 않겠다.']]);
-  return '<div class="chapter">시즌 1 엔딩 · 상민</div><h2 tabindex="-1">돌아오지 않은 사람</h2>'+castList(['옥례'])+'<div class="comic-flow">'+body+'</div>';
+  const shore=newArt1('S1-13');
+  const after=shore?beat(shore,'며칠 뒤에도 옥례는 빈 나루에 나와 섰다. 갈대 사이에서 건진 종이 조각을 품에 넣은 채였다.'):'';
+  return '<div class="chapter">시즌 1 엔딩 · 상민</div><h2 tabindex="-1">돌아오지 않은 사람</h2>'+castList(['옥례'])+'<div class="comic-flow">'+body+after+'</div>';
 }
 const openingStory=[["큰물이 오기 전, 여천의 어느 오후. 어머니가 문턱에 앉아 연이의 닳은 버선을 꿰매고 있었다.",[["이서","그 실만 유난히 파랗네요. 연이가 또 어디서 벗어 놓으면 한눈에 찾겠어요."],["어머니","그러려고 쓴 거야. 마지막 매듭은 소복이가 지어 주고 싶다더라. 그 자린 남겨 둬."]]],["그날 저녁, 둑 너머로 빗물이 넘었다. 피란 온 집마다 아이들이 있었지만 배는 한 척뿐이었다.",[["이서","저도 같이 갈게요. 어머니 혼자 아이들을 다 못 데려가요."],["어머니","넌 단오 데리고 집에 가서 등불을 켜 둬. 뭍에 남은 아이들이 어둠 속에서 우리 집을 찾아올 수 있게."]]],["이서가 둑을 떠나기 전 마지막으로 본 것은 어머니가 작은 아이의 두 팔을 잡아 배에 올리는 모습이었다. 아이의 얼굴은 빗줄기에 가렸다. 배 안에는 관아의 낙인이 찍힌 쌀자루도 보였다.",[]],["이서는 단오와 아이들을 집에 들였다. 젖은 겉옷을 벗기고 나니 등불 기름이 거의 바닥났다. 나루 쪽을 보고 있던 단오가 낮게 물었다.",[["단오","어머니한테도 이 불이 보일까?"],["이서","문 닫지 마. 찾는 사람이 있으면 여기까지 들어올 수 있게."]]],["사흘 뒤, 하류에서 어머니를 찾았다. 이서는 장례를 치른 뒤 빈자리에 어머니의 바느질 상자를 올려놓았다. 그날 배에 누가 탔고 누가 돌아왔는지는 끝내 듣지 못했다.",[["단오","누님, 오늘도 쌀을 못 빌렸어."],["이서","조금만 더 버티자. 관아에서 물난리 난 집에 쌀을 나눈대. 우리 이름은 호적에 있으니까."]]],["홍수 뒤 스무 날. 이서는 단오와 나눠 먹을 쌀을 받으러 빈 바가지를 들고 구휼소로 갔다. 구휼소 앞 담벼락에 소복이 서 있었다. 소복은 이서를 보고도 줄이 끝날 때까지 다가오지 않았다.",[]]];
 function openingStoryMarkup(){
@@ -718,7 +749,7 @@ function render(focus=false){
     state.echo='';
     const speaker=state.rank===0 && state.ending===2?'단오':state.rank===1 && state.ending===1?'짐꾼':'이서';
     const endingPeople=[...endingCast[state.rank][state.ending],finalReactions[state.rank][state.ending][2][0]];
-    reader.innerHTML=scene('시즌 1 엔딩',title,100,5,15+state.rank*3+state.ending,action,'',line,speaker,endingPeople)+endingAftermath()+consequenceAtEnding()+rankDeparture();
+    reader.innerHTML=scene('시즌 1 엔딩',title,100,5,15+state.rank*3+state.ending,action,'',line,speaker,endingPeople)+endingAftermath()+endingNewBeat()+consequenceAtEnding()+rankDeparture();
     buttons=[control('이서의 마지막 호적을 펼친다',openFinalRecord,'',true)];
   }
   const nav=document.createElement('div');nav.className='choices';nav.setAttribute('aria-label','다음 선택');

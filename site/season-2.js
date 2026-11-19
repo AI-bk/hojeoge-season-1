@@ -233,8 +233,8 @@ function characterPanels(step,cast){
     return reply+child+panel(...withNew('S2-03',scene.clerk));
   }
   if(step===6){
-    const clerk=panel('s',1,...scene.clerkResponse[cast.clerk]);
-    const seo=cast.seo==='cooperating'?panel('e',3,...scene.namedSource):cast.seo==='anonymous'?panel('n',9,...scene.unnamedSource):'';
+    const clerk=panel(...withNew('S2-12',['s',1]),...scene.clerkResponse[cast.clerk]);
+    const seo=cast.seo==='cooperating'?panel(...withNew('S2-11',['e',3]),...scene.namedSource):cast.seo==='anonymous'?panel('n',9,...scene.unnamedSource):'';
     const escort=cast.escort==='gate'
       ? panel('r',route.art+8,topic(route.companion)+' 이서와 함께 궁문으로 가기로 했다. 다른 사람의 몫까지 대신 말해 달라는 부탁은 받지 않았다.',[[route.companion,scene.escortWords[inherited.rank]]])
       : cast.escort==='departed'
