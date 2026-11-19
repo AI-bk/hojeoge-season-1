@@ -68,8 +68,8 @@ function escaped(value){
 }
 function art(kind,cut){
   const x=cut%4*100/3;
-  const y=Math.floor(cut/4)*((kind==='n'||kind==='r'||kind==='c')?100/3:50);
-  return '<div class="art'+(kind==='e'?' detail':kind==='n'?' narrative':kind==='r'?' route-art':kind==='c'?' cast-art':'')+'" data-art="'+kind+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
+  const y=Math.floor(cut/4)*((kind==='n'||kind==='r')?100/3:50);
+  return '<div class="art'+(kind==='e'?' detail':kind==='n'?' narrative':kind==='r'?' route-art':'')+'" data-art="'+kind+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
 }
 function panel(kind,cut,caption,lines=[]){
   return '<figure class="beat">'+art(kind,cut)+'<figcaption>'+(caption?'<p>'+escaped(caption)+'</p>':'')+
@@ -197,15 +197,15 @@ function opening(){
 }
 function characterPanels(step,cast){
   const scene=characterScenes;
-  if(step===4)return panel('c',...scene.messenger);
+  if(step===4)return panel(...scene.messenger);
   if(step===5){
-    const reply=panel('c',...scene.reply[cast.seo]);
-    const child=panel('c',...scene.child[cast.myeongseon]);
-    return reply+child+panel('c',...scene.clerk);
+    const reply=panel(...scene.reply[cast.seo]);
+    const child=panel(...scene.child[cast.myeongseon]);
+    return reply+child+panel(...scene.clerk);
   }
   if(step===6){
-    const clerk=panel('c',8,...scene.clerkResponse[cast.clerk]);
-    const seo=cast.seo==='cooperating'?panel('c',10,...scene.namedSource):cast.seo==='anonymous'?panel('c',11,...scene.unnamedSource):'';
+    const clerk=panel('s',1,...scene.clerkResponse[cast.clerk]);
+    const seo=cast.seo==='cooperating'?panel('e',3,...scene.namedSource):cast.seo==='anonymous'?panel('n',9,...scene.unnamedSource):'';
     const escort=cast.escort==='gate'
       ? panel('r',route.art+8,'동행인은 이서와 함께 궁문으로 가기로 했다. 다른 사람의 몫까지 대신 말해 달라는 부탁은 받지 않았다.',[[route.companion,scene.escortWords[inherited.rank]]])
       : cast.escort==='departed'
@@ -215,17 +215,17 @@ function characterPanels(step,cast){
     return clerk+seo+escort+punishment;
   }
   if(step===7){
-    const child=cast.myeongseon==='travel'?panel('c',...scene.gateChild):panel('c',...scene.gateAlone[cast.myeongseon]);
-    const seo=cast.seo==='cooperating'?panel('c',14,...scene.shadow):'';
+    const child=cast.myeongseon==='travel'?panel(...scene.gateChild):panel(...scene.gateAlone[cast.myeongseon]);
+    const seo=cast.seo==='cooperating'?panel('n',8,...scene.shadow):'';
     return (cast.escort==='gate'?panel('r',route.art+8,'숙소를 나서기 전 마지막으로, 이서는 동행인이 직접 확인할 수 있는 줄을 다시 펼쳤다.',[[route.companion,'문 앞에서는 내가 직접 본 것만 내 이름으로 말할게.']]):'')+child+seo;
   }
   return '';
 }
 function speakerCut(speaker,step){
   if(speaker===route.companion)return ['r',route.art+(step<2?0:step<4?4:8)];
-  const fixed={'연이':['n',0],'검문 아전':['n',4],'명선':['n',6],'서겸':['c',1],'하 서리':['c',8],'문지기':['n',13],'인계인':['s',10]};
+  const fixed={'연이':['n',0],'검문 아전':['n',4],'명선':['n',6],'서겸':['n',8],'하 서리':['s',1],'문지기':['n',13],'인계인':['s',10]};
   if(fixed[speaker])return fixed[speaker];
-  if(speaker==='이서')return [['n',1],['r',route.art],['s',4],['n',7],['c',5],['n',10],['r',15]][step];
+  if(speaker==='이서')return [['n',1],['r',route.art],['s',4],['n',7],['n',5],['n',10],['r',15]][step];
   return null;
 }
 function disciplinePanels(action){
@@ -276,8 +276,8 @@ function travelScene(step){
   const childAbsent=cast.myeongseon!=='travel';
   const solo=childAbsent&&(step===4||step===5||step===6||step===7);
   const routeShot=step===1||((step===2||step===5)&&cast.escort==='travel');
-  const kind=step===4&&cast.myeongseon==='travel'?'c':solo?'c':routeShot?'r':'s';
-  const cut=step===4&&cast.myeongseon==='travel'?4:solo?({4:5,5:7,6:8,7:13}[step]):routeShot?route.art+(step===1?0:step===2?4:8):scene.art;
+  const soloCuts={4:['n',10],5:['s',7],6:['r',15],7:['s',11]};
+  const [kind,cut]=step===4&&cast.myeongseon==='travel'?['s',5]:solo?soloCuts[step]:routeShot?['r',route.art+(step===1?0:step===2?4:8)]:['s',scene.art];
   const body=panel(kind,cut,caption,lines);
   const extraLine=turns.arrivals[step];
   const canSpeak=extraLine&&(extraLine[0]==='이서'||step===1||cast.escort==='travel'||cast.escort==='gate');
@@ -337,7 +337,7 @@ function previousAction(){
     (showEffect?panel('r',routeCut,effect,sameCut?[reply]:[]):'')+'</section>';
 }
 function gateMoment(id,record){
-  if(id===2&&record.witness!=='명선')return panel('n',13,'문지기 상 위에 두 사람의 이름이 한 줄로 나란히 적혔다. 누구도 상대의 말을 대신 꺼내지 않았다.');
+  if(id===2&&record.witness!=='명선')return panel('e',11,'문지기 상 위에 두 사람의 이름이 한 줄로 나란히 적혔다. 누구도 상대의 말을 대신 꺼내지 않았다.');
   return panel(...gateMoments[id]);
 }
 function finale(){
@@ -349,11 +349,11 @@ function finale(){
   let lead=line;
   if(id===3&&record.witness){arrival=record.witness+'도 함께 왔지만 문지기는 이서의 이름만 먼저 확인했다. 두 사람은 진술을 별도로 확인받기 위해 돌턱에 앉았다.';lead='함께 온 사람의 진술은 따로 확인받겠습니다. 부르실 때까지 여기서 같이 기다리겠어요.';}
   if(id===2)arrival=record.witness+'도 자기 이름으로 진술하겠다고 했다. 문지기가 두 이름을 같은 줄에 적었다.';
-  const pictures=[['r',12],['r',12],record.witness==='명선'?['c',12]:['r',route.art+8],['c',record.characters.myeongseon==='travel'?12:13],['e',5],['c',13]];
+  const pictures=[['r',12],['r',12],record.witness==='명선'?['r',13]:['r',route.art+8],['r',record.characters.myeongseon==='travel'?13:15],['e',5],['r',15]];
   const seoEnding=record.characters.seo==='gate-shadow'
-    ? panel('c',14,'서겸은 궁 담 아래에 멈춰 섰다. 문지기에게 먼저 다가가지는 않았다.',[['서겸','제가 본 봉투 이야기가 나오면 부르세요. 이제 제 이름으로 말하겠습니다.']])
+    ? panel('n',8,'서겸은 궁 담 아래에 멈춰 섰다. 문지기에게 먼저 다가가지는 않았다.',[['서겸','제가 본 봉투 이야기가 나오면 부르세요. 이제 제 이름으로 말하겠습니다.']])
     : record.characters.seo==='at-lodging'
-      ? panel('c',13,'이서는 정해진 인계 순서를 따르기로 했다. 서겸이 공적으로 불릴 때까지 기다리겠다고 한 곳은 도성의 숙소였다.')
+      ? panel('e',4,'이서는 정해진 인계 순서를 따르기로 했다. 서겸이 공적으로 불릴 때까지 기다리겠다고 한 곳은 도성의 숙소였다.')
       : '';
   const punishment=record.discipline?.atStep===8?disciplinePanels(record.discipline):'';
   const [kind,cut]=pictures[id];
@@ -365,7 +365,7 @@ function finale(){
   const transferred=write('yeocheon-season-three-v1handoff:'+inherited.key,record);
   reader.innerHTML='<div class="chapter">시즌 2 엔딩 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(title)+'</h2>'+
     panel(kind,cut,arrival,[['이서',lead],arrivalEndings[id][4]])+
-    gateMoment(id,record)+seoEnding+punishment+panel('c',15,doorCaption,[['문 너머의 목소리',doorLine]])+
+    gateMoment(id,record)+seoEnding+punishment+panel('n',13,doorCaption,[['문 너머의 목소리',doorLine]])+
     '<section class="gate-record" aria-label="시즌 2 종료 기록"><p class="chapter">시즌 2 완 · 궁문 바깥</p><h2>궁문 앞에 남긴 기록</h2><dl><dt>이서의 신분</dt><dd>'+escaped(route.rank)+'</dd><dt>문 앞의 상황</dt><dd>'+escaped(material)+'</dd><dt>궁문 밖에 온 사람</dt><dd>'+escaped(record.characters.gatePeople.slice(2).join(' · ')||'이서 홀로 도착')+'</dd>'+
     (record.discipline?'<dt>관아의 처분</dt><dd>'+escaped(record.discipline.person+' · '+record.discipline.sanction)+'</dd>':'')+'</dl>'+
     '<p>시즌 3는 이 문이 열리는 순간부터 시작됩니다.</p>'+(transferred?'<p><a class="link primary" href="season-3.html">시즌 3 이어 읽기</a></p>':'<p class="intro">이 브라우저에 다음 시즌 기록을 저장하지 못했습니다.</p>')+'</section>';

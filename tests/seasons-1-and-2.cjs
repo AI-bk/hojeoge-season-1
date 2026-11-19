@@ -160,7 +160,7 @@ for(const rank of [2,3,4,5]){
     assert.equal(record.ending,end);
     assert.equal(record.location,'궁문 바깥');
     assert.deepEqual(record.routeSelections,answers);
-    assert.match(done.html(),/data-art="c15"[\s\S]*궁문 앞에 남긴 기록/);
+    assert.match(done.html(),/data-art="n13"[\s\S]*궁문 앞에 남긴 기록/);
     assert.match(done.html(),/시즌 3는 이 문이 열리는 순간부터 시작/);
     const transfer=JSON.parse(storage.get('yeocheon-season-three-v1handoff:'+done.value('inherited.key')));
     assert.deepEqual(transfer,record);
@@ -183,8 +183,8 @@ for(const rank of [2,3,4,5]){
     storage.set(current,JSON.stringify({answers:journey,reaction:true}));
     const gate=open(s2);
     assert.equal(gate.buttons().length,3);
-    assert.equal(gate.html().includes('data-art="c12"'),child===1);
-    assert.equal(gate.html().includes('data-art="c14"'),answer===1);
+    assert.equal(gate.html().includes('data-art="r13"'),child===1);
+    assert.equal(gate.html().includes('data-art="n8"'),answer===1);
     for(const endingChoice of [0,1,2]){
       const answers=[...journey,endingChoice];
       storage.set(current,JSON.stringify({answers,reaction:false}));
@@ -195,7 +195,7 @@ for(const rank of [2,3,4,5]){
       assert.equal(atGate.includes('서겸'),answer===1&&endingChoice!==2);
       assert.equal(atGate.length,2+ +(child===1)+ +(invited===1&&preparation===1)+ +(answer===1&&endingChoice!==2));
       assert.deepEqual(JSON.parse(storage.get('yeocheon-season-three-v1handoff:'+ending.value('inherited.key'))).characters,record.characters);
-      assert.equal(ending.html().includes('data-art="c14"'),atGate.includes('서겸'));
+      assert.equal(ending.html().includes('data-art="n8"'),atGate.includes('서겸'));
     }
   }
 }
@@ -226,7 +226,7 @@ for(const rank of [2,3,4,5]){
     assert.equal(result.discipline?.person??null,person);
     assert.equal(result.characters.gatePeople.includes('서겸'),onGate);
     assert.equal(result.location,'궁문 바깥');
-    assert.match(p.html(),/data-art="c15"[\s\S]*궁문 밖에 온 사람/);
+    assert.match(p.html(),/data-art="n13"[\s\S]*궁문 밖에 온 사람/);
     assert.deepEqual(JSON.parse(storage.get('yeocheon-season-three-v1handoff:'+p.value('inherited.key'))).discipline,result.discipline);
     assert.deepEqual(open(s2).value('gateRecord()'),result);
   }
