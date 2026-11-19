@@ -77,7 +77,7 @@ function art(kind,cut){
 }
 let sceneStep=0;
 function faceCut(speaker){
-  const faces={'연이':0,'하 서리':2,'서겸':3,'명선':4,'검문 아전':6,'사환':10,'인계인':11};
+  const faces={'연이':0,'하 서리':2,'서겸':3,'명선':4,'검문 아전':6,'사환':10,'인계인':11,'접수 관원':11};
   const companions={2:1,3:8,4:9,5:7};
   if(speaker==='이서')return sceneStep<=1||sceneStep===3?15:sceneStep===2?14:sceneStep<=5?12:13;
   if(route&&speaker===route.companion)return companions[inherited.rank];
@@ -288,7 +288,7 @@ function travelScene(step){
   let caption=step===1?route.intro:scene.body;
   let lines=step===1?[[route.companion,route.line]]:scene.lines;
   if(step===4&&cast.myeongseon!=='travel'){
-    caption='여천에서 뒤따라 온 편지는 연이의 호적만 바로잡아 준다고 했다. '+(cast.myeongseon==='sheltered'?'명선은 안전한 집에 남아 있다.':'명선은 자기 말을 맡겨 두고 역참에 남았다.');
+    caption='한양에서 내려온 편지가 역참에 머물던 이서에게 닿았다. 연이의 호적만은 바로잡아 준다고 했다. '+(cast.myeongseon==='sheltered'?'명선은 안전한 집에 남아 있다.':'명선은 자기 말을 맡겨 두고 역참에 남았다.');
     lines=[['이서','연이의 줄만 돌려 달라고 하면, 그날 죽은 아이는 끝내 자기 이름을 못 찾을 거야.']];
   }
   if(step===6&&cast.myeongseon!=='travel'){
