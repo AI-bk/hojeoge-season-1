@@ -222,7 +222,7 @@ function ending(){
       ? frame('r',6,'판관은 하 서리가 옮긴 줄과 달라진 날짜를 대조하라고 했다. 필사 금지는 남았지만, 다음 심리에서는 하 서리도 직접 부르기로 했다.')
       : '';
   const responsibility=examined?'날짜를 고친 수결은 별도 조사에 넘어갔다.':progress.answers[6]===1?'서로 다른 증언이 다음 조회의 질문으로 남았다.':'원본과 진술은 별개의 봉인으로 보관됐다.';
-  const closing={record:['S3-09','윤석이 마지막 붓을 거두었다. 비워 두었던 옆줄에 처음으로 난희의 이름이 들어갔다.'],voices:['S3-10','해가 오르는 마당에 그날 말한 사람들이 서 있었다. 누구도 남의 말을 대신하지 않았다.'],seal:['S3-11','두 봉투는 서로 닿지 않게 놓였다. 하나는 오늘 열렸고, 하나는 약속한 날까지 닫혀 있다.'],pending:['S3-12','판관이 남긴 빈 줄 앞에서 이서는 붓을 들지 않았다. 비워 둔 것도 기록이라고 여겼다.']}[outcome];
+  const closing={record:['S3-09','윤석이 마지막 붓을 거두었다. 비워 두었던 옆줄에 처음으로 난희의 이름이 들어갔다.'],voices:['S3-10','해가 오르는 마당에 그날 말한 사람들이 서 있었다. 누구도 남의 말을 대신하지 않았다.'],seal:['S3-11','등불 아래 두 봉투가 남았다. 하나는 오늘 끈이 풀렸고, 다른 하나는 약속한 날까지 묶여 있다.'],pending:['S3-12','판관이 남긴 빈 줄 앞에서 이서는 붓을 들지 않았다. 비워 둔 것도 기록이라고 여겼다.']}[outcome];
   const closingFrame=hasNewCut(closing[0])?frame(...newCut(closing[0]),closing[1]):'';
   reader.innerHTML=heading('시즌 3 완 · '+rankStories[handoff.rank][0],title)+frame(...newCut('S3-18','r',1),caption,'이서',line)+closingFrame+remedy+frame('s',8,'해가 뜨자 궁문 바깥까지 발소리가 들렸다. '+responsibility)+
     '<section class="verdict"><h2>궁에 남은 기록</h2><dl><dt>이서의 신분</dt><dd>'+text(rankStories[handoff.rank][0])+'</dd><dt>기록의 결말</dt><dd>'+text(title)+'</dd></dl></section>';
