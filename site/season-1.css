@@ -64,3 +64,10 @@ header {
     justify-content: space-between;
   }
 }
+
+/* 광고 칸과 사이트 안내 링크: 결말 아래에서 버튼과 충분히 떨어뜨린다 */
+.ad-slot{margin:56px auto 16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);min-height:120px;max-width:100%}
+.ad-slot::before{content:"광고";display:block;font-size:12px;opacity:.6;margin-bottom:6px}
+.ad-slot[hidden]{display:none}
+.site-links{margin:28px 0 8px;text-align:center;font-size:13px;opacity:.75}
+.site-links a{color:inherit}

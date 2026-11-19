@@ -11,6 +11,8 @@ html,body{margin:0;height:100%;background:#152621;overflow:hidden}
 noscript{display:block;padding:24px;color:#f3ead8;font:16px/1.6 sans-serif}
 noscript a{color:#f3d58d}
 </style>
+<script src="ads-config.js"></script>
+<script src="ads.js" defer></script>
 </head>
 <body>
 <iframe id="stage" title="호적에 없는 봄" allow="autoplay; fullscreen"></iframe>
@@ -20,6 +22,7 @@ noscript a{color:#f3d58d}
 // 주소창은 이 페이지 주소로 유지된다. 진행 기록(localStorage)은 출처가 같아 그대로 공유된다.
 (function(){
   var pages=['season-1.html','season-2.html','season-3.html'];
+  var extras=['about.html','privacy.html']; // 셸 안에서 열 수 있지만 '마지막 시즌'으로 기억하지 않는 안내 페이지
   var key='hojeoge-shell-page';
   var stage=document.getElementById('stage');
   var theme=document.querySelector('meta[name="theme-color"]');
@@ -32,8 +35,8 @@ noscript a{color:#f3d58d}
     if(!doc)return;
     var page=win.location.pathname.split('/').pop()||'';
     // 시즌 페이지 밖(셸 자신 등)으로 나가면 셸이 겹치지 않도록 시즌 1로 되돌린다.
-    if(pages.indexOf(page)<0){stage.src=pages[0];return;}
-    try{localStorage.setItem(key,page);}catch(e){}
+    if(pages.indexOf(page)<0&&extras.indexOf(page)<0){stage.src=pages[0];return;}
+    if(pages.indexOf(page)>=0){try{localStorage.setItem(key,page);}catch(e){}}
     if(doc.title)document.title=doc.title;
     var t=doc.querySelector('meta[name="theme-color"]');
     if(t&&theme){theme.content=t.content;document.body.style.background=stage.style.background=t.content;}
