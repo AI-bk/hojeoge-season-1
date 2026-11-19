@@ -344,7 +344,7 @@ function refreshControls(message){
 }
 function render(focus=false,message=''){
   if(!inherited){
-    reader.innerHTML='<div class="chapter">시즌 2</div><h1 tabindex="-1">궁문까지</h1><p class="intro">이 브라우저에 한양행으로 이어지는 시즌 1 결말이 없습니다. 시즌 1을 마치면 이어 읽을 수 있습니다.</p><p><a class="link primary" href="index.html">시즌 1로 돌아가기</a></p>';
+    reader.innerHTML='<div class="chapter">시즌 2</div><h1 tabindex="-1">궁문까지</h1><p class="intro">이 브라우저에 한양행으로 이어지는 시즌 1 결말이 없습니다. 시즌 1을 마치면 이어 읽을 수 있습니다.</p><p><a class="link primary" href="season-1.html">시즌 1로 돌아가기</a></p>';
   }else if(progress.answers.length===8)finale();
   else if(!progress.answers.length)opening();
   else{

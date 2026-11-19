@@ -4,19 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#152621">
-<title>호적에 없는 봄 — 시즌 1</title>
-<link rel="stylesheet" href="season-1.css">
-<script defer src="season-1.js"></script>
+<title>호적에 없는 봄</title>
+<style>
+html,body{margin:0;height:100%;background:#152621;overflow:hidden}
+#stage{display:block;border:0;width:100%;height:100vh;height:100dvh;background:#152621}
+noscript{display:block;padding:24px;color:#f3ead8;font:16px/1.6 sans-serif}
+noscript a{color:#f3d58d}
+</style>
 </head>
-<body><main>
-<header><strong>여천 이야기 · 시즌 1</strong><div class="header-actions"><span id="count"></span><button id="music-toggle" class="music-toggle" type="button" aria-pressed="false">배경음악 켜기</button></div></header>
-<audio id="music" loop preload="none"></audio>
-<div class="save-toolbar" aria-label="진행 기록">
-  <button id="save-progress" type="button">저장하기</button>
-  <button id="load-progress" type="button">불러오기</button>
-  <span id="save-status" role="status"></span>
-</div>
-<section id="reader" aria-live="polite"></section>
-<footer class="foot"><button id="reset" type="button" hidden>처음부터</button></footer>
-</main>
-</body></html>
+<body>
+<iframe id="stage" title="호적에 없는 봄" allow="autoplay; fullscreen"></iframe>
+<noscript>자바스크립트를 켜면 한 주소에서 이어 읽을 수 있습니다. <a href="season-1.html">시즌 1 읽기</a></noscript>
+<script>
+// 한 주소에서 시즌 1~3을 이어 읽는 셸. 시즌 페이지는 같은 출처의 iframe 안에서 바뀌고,
+// 주소창은 이 페이지 주소로 유지된다. 진행 기록(localStorage)은 출처가 같아 그대로 공유된다.
+(function(){
+  var pages=['season-1.html','season-2.html','season-3.html'];
+  var key='hojeoge-shell-page';
+  var stage=document.getElementById('stage');
+  var theme=document.querySelector('meta[name="theme-color"]');
+  function remembered(){
+    try{var p=localStorage.getItem(key);return pages.indexOf(p)>=0?p:pages[0];}catch(e){return pages[0];}
+  }
+  stage.addEventListener('load',function(){
+    var win,doc;
+    try{win=stage.contentWindow;doc=stage.contentDocument;}catch(e){return;}
+    if(!doc)return;
+    var page=win.location.pathname.split('/').pop()||'';
+    // 시즌 페이지 밖(셸 자신 등)으로 나가면 셸이 겹치지 않도록 시즌 1로 되돌린다.
+    if(pages.indexOf(page)<0){stage.src=pages[0];return;}
+    try{localStorage.setItem(key,page);}catch(e){}
+    if(doc.title)document.title=doc.title;
+    var t=doc.querySelector('meta[name="theme-color"]');
+    if(t&&theme){theme.content=t.content;document.body.style.background=stage.style.background=t.content;}
+    try{stage.focus();}catch(e){}
+  });
+  stage.src=remembered();
+})();
+</script>
+</body>
+</html>

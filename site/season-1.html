@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script>if(window.top===window){try{localStorage.setItem('hojeoge-shell-page','season-1.html')}catch(e){}location.replace('./')}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#152621">
+<title>호적에 없는 봄 — 시즌 1</title>
+<link rel="stylesheet" href="season-1.css">
+<script defer src="season-1.js"></script>
+</head>
+<body><main>
+<header><strong>여천 이야기 · 시즌 1</strong><div class="header-actions"><span id="count"></span><button id="music-toggle" class="music-toggle" type="button" aria-pressed="false">배경음악 켜기</button></div></header>
+<audio id="music" loop preload="none"></audio>
+<div class="save-toolbar" aria-label="진행 기록">
+  <button id="save-progress" type="button">저장하기</button>
+  <button id="load-progress" type="button">불러오기</button>
+  <span id="save-status" role="status"></span>
+</div>
+<section id="reader" aria-live="polite"></section>
+<footer class="foot"><button id="reset" type="button" hidden>처음부터</button></footer>
+</main>
+</body></html>

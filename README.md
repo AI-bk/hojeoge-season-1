@@ -10,13 +10,14 @@
 python -m http.server 8000 --directory site
 ```
 
-시작 주소는 [http://localhost:8000/](http://localhost:8000/)입니다. 시즌 2·3 직접 주소는 각각 `/season-2.html`, `/season-3.html`입니다. 이전 시즌을 완료한 페이지에서 이어 읽기 버튼을 누르면 진행 정보가 전달됩니다.
+시작 주소는 [http://localhost:8000/](http://localhost:8000/)입니다. `index.html`은 시즌 페이지를 같은 출처의 iframe에 띄우는 셸이라서, 이어 읽기 버튼으로 시즌을 넘어가도 주소창은 시작 주소 그대로입니다. 셸은 마지막으로 연 시즌을 `hojeoge-shell-page`에 기억해 새로고침하면 그 시즌을 다시 엽니다. `/season-1.html`~`/season-3.html`을 직접 열면 시작 주소로 바뀌면서 그 시즌이 셸 안에 열립니다.
 
 ## 파일
 
 | 경로 | 편집할 내용 |
 | --- | --- |
-| `site/index.html`, `site/season-1.css`, `site/season-1.js` | 시즌 1 진입 화면, 컷 배치, 장면과 분기 |
+| `site/index.html` | 한 주소에서 시즌 1~3을 이어 읽는 셸(iframe). 시즌 내용은 없음 |
+| `site/season-1.html`, `site/season-1.css`, `site/season-1.js` | 시즌 1 진입 화면, 컷 배치, 장면과 분기 |
 | `site/season-2-story.js`, `site/season-2.js`, `site/season-2.css` | 신분별 대사와 컷, 선택과 처분, 궁문 결말 |
 | `site/season-3-story.js`, `site/season-3.js`, `site/season-3.css` | 궁 안의 대사와 선택, 결말, 컷 안의 선택창 |
 | `site/*.webp`, `site/audio/*.mp3` | 실행에 쓰는 이미지와 음악. 여러 컷이 한 이미지에 배치돼 있는 파일은 CSS와 JS의 배열 좌표를 함께 확인 |
