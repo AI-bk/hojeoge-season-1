@@ -76,6 +76,12 @@ function art(kind,cut){
   return '<div class="art'+(kind==='e'?' detail':kind==='n'?' narrative':kind==='r'?' route-art':kind==='k'?' close-art':kind==='g'?' new-art':'')+'" data-art="'+kind+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
 }
 let sceneStep=0;
+// 새로 그린 컷(season-2-new.webp)이 있으면 그 칸을, 없으면 원래 그림을 쓴다.
+function withNew(slot,entry){
+  const slots=typeof NEW_CUT_SLOTS==='object'&&NEW_CUT_SLOTS?NEW_CUT_SLOTS:{};
+  return slot in slots?['g',slots[slot],...entry.slice(2)]:entry;
+}
+function hasNew(slot){return typeof NEW_CUT_SLOTS==='object'&&!!NEW_CUT_SLOTS&&slot in NEW_CUT_SLOTS;}
 function faceCut(speaker){
   const faces={'연이':0,'하 서리':2,'서겸':3,'명선':4,'검문 아전':6,'사환':10,'인계인':11,'접수 관원':11};
   const companions={2:1,3:8,4:9,5:7};
@@ -220,11 +226,11 @@ function opening(){
 }
 function characterPanels(step,cast){
   const scene=characterScenes;
-  if(step===4)return panel(...scene.messenger);
+  if(step===4)return panel(...withNew('S2-02',scene.messenger));
   if(step===5){
-    const reply=panel(...scene.reply[cast.seo]);
-    const child=panel(...scene.child[cast.myeongseon]);
-    return reply+child+panel(...scene.clerk);
+    const reply=panel(...withNew({anonymous:'S2-04',withdrawn:'S2-05'}[cast.seo]||'',scene.reply[cast.seo]));
+    const child=panel(...withNew(cast.myeongseon==='sheltered'?'S2-07':'',scene.child[cast.myeongseon]));
+    return reply+child+panel(...withNew('S2-03',scene.clerk));
   }
   if(step===6){
     const clerk=panel('s',1,...scene.clerkResponse[cast.clerk]);
@@ -232,7 +238,7 @@ function characterPanels(step,cast){
     const escort=cast.escort==='gate'
       ? panel('r',route.art+8,topic(route.companion)+' 이서와 함께 궁문으로 가기로 했다. 다른 사람의 몫까지 대신 말해 달라는 부탁은 받지 않았다.',[[route.companion,scene.escortWords[inherited.rank]]])
       : cast.escort==='departed'
-        ? panel('r',route.art+8,'궁문으로 향하기 전, '+topic(route.companion)+' 그동안 맡았던 일을 이서에게 돌려주고 숙소에 남기로 했다.',[[route.companion,'문 밖까지 갈 준비는 안 됐어. 내가 본 일을 넘길 때는 먼저 내게 알려 줘.']])
+        ? panel(...withNew('S2-06'+'abcd'[inherited.rank-2],['r',route.art+8]),'궁문으로 향하기 전, '+topic(route.companion)+' 그동안 맡았던 일을 이서에게 돌려주고 숙소에 남기로 했다.',[[route.companion,'문 밖까지 갈 준비는 안 됐어. 내가 본 일을 넘길 때는 먼저 내게 알려 줘.']])
         : '';
     const punishment=cast.sanction?.key==='clerk'?disciplinePanels(cast.sanction):'';
     return clerk+seo+escort+punishment;
@@ -256,7 +262,8 @@ function speakerCut(speaker,step){
 function disciplinePanels(action){
   if(!action)return '';
   const scenes=disciplineScenes[action.key];
-  return scenes.map(([kind,cut,caption,lines])=>panel(kind,cut,caption,lines)).join('');
+  const slots=action.key==='supervisor'?['S2-08','S2-09']:[];
+  return scenes.map((scene,i)=>panel(...withNew(slots[i]||'',scene))).join('');
 }
 function availableChoices(step,cast,answers=progress.answers){
   const labels=[...turns.choices[step]];
@@ -304,7 +311,7 @@ function travelScene(step){
   const routeShot=step===1||((step===2||step===5)&&cast.escort==='travel');
   const soloCuts={4:['n',10],5:['s',7],6:['r',15],7:['s',11]};
   const [kind,cut]=step===4&&cast.myeongseon==='travel'?['s',5]:solo?soloCuts[step]:routeShot?['r',route.art+(step===1?0:step===2?4:8)]:['s',scene.art];
-  const body=(step===3?panel(...newCuts.stationKitchen):'')+panel(kind,cut,caption,lines);
+  const body=(step===3&&hasNew('S2-01')?panel(...newCuts.stationKitchen):'')+panel(kind,cut,caption,lines);
   const extraLine=turns.arrivals[step];
   const canSpeak=extraLine&&(extraLine[0]==='이서'||step===1||cast.escort==='travel'||cast.escort==='gate');
   const reply=turns.answers[step];
@@ -365,6 +372,7 @@ function previousAction(){
 }
 function gateMoment(id,record){
   if(id===2&&record.witness!=='명선')return panel('e',11,'문지기 상 위에 두 사람의 이름이 한 줄로 나란히 적혔다. 누구도 상대의 말을 대신 꺼내지 않았다.');
+  if(id===3&&!record.witness)return panel(...withNew('S2-10',gateMoments[id]));
   return panel(...gateMoments[id]);
 }
 function finale(){

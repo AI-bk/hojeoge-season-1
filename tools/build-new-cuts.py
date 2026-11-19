@@ -22,4 +22,8 @@ for name, slot in SLOTS.items():
     out.paste(im, ((slot % 4) * CELL, (slot // 4) * CELL))
     found.append(name)
 out.save(os.path.join(root, 'season-2-new.webp'), 'WEBP', quality=88, method=6)
+slots = ','.join("'%s':%d" % (n, SLOTS[n]) for n in found)
+with open(os.path.join(root, 'season-2-new-slots.js'), 'w', encoding='utf-8') as f:
+    f.write('// tools/build-new-cuts.py가 만든다. season-2-new.webp에 실제로 들어간 새 컷과 칸 번호.\n')
+    f.write('var NEW_CUT_SLOTS = {%s};\n' % slots)
 print('packed:', ', '.join(found))
