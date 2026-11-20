@@ -119,6 +119,12 @@ function journeyFrame(step){
   }
   return '';
 }
+function rankBeat(step){
+  const beat=rankBeats3[handoff.rank]?.[step];
+  if(!beat)return '';
+  const [speaker,caption,line]=beat;
+  return frame(...(speakerPortrait(speaker)||['r',4]),caption,speaker,line);
+}
 function extraBuildup(step){
   if(step===1&&hasNewCut('S3-44'))return frame(...newCut('S3-44'),'기록청 깊은 방. 최 상궁이 문을 열게 하자 윤석이 상자에서 원장을 꺼냈다. 이서는 상궁 곁에서 그 끈을 내려다보았다.');
   if(step===2&&hasNewCut('S3-07'))return frame(...newCut('S3-07'),'궁 안 약방. 의관 이현이 약재 서랍 앞에서 이서를 맞았다. 윤석이 미리 기별을 넣어 둔 참이었다.','이현','기록관이 보냈다고 들었습니다. 제 장부는 두 권인데, 어느 쪽부터 보시겠습니까?');
@@ -201,7 +207,7 @@ function decision(step){
   const childVisible=handoff.characters?.myeongseon==='travel'||handoff.witness==='명선';
   const image=step===0&&!childVisible?1:act.image;
   const line=step===0?(handoff.witness?'이 증인을 누가 데려왔느냐?':'이 기록을 가지고 온 사람이 너냐?'):act.line;
-  const buildup=step===0?buildIntro()+journeyFrame(0):journeyFrame(step)+extraBuildup(step)+(act.buildup??[]).map(cut=>frame(...cut)).join('')+branchCut(step);
+  const buildup=step===0?buildIntro()+journeyFrame(0):journeyFrame(step)+rankBeat(step)+extraBuildup(step)+(act.buildup??[]).map(cut=>frame(...cut)).join('')+branchCut(step);
   reader.innerHTML=heading('시즌 3 · '+rankStories[handoff.rank][0],step===0?'문 안의 이름':act.title)+buildup+frame('s',image,'',act.speaker,line,'decision');
   const options=document.createElement('div');
   options.className='choices';
