@@ -108,7 +108,20 @@ loadButton.onclick=()=>{
   commit(()=>{state=mark.progress});
   refreshSaveControls('불러옴 · '+mark.title);
 };
-const tracks=['after-rain','night-ferry','spring'];
+// 시즌 1 전용 배경음악: 장면의 장소와 분위기에 맞춰 고른다.
+const pageTracks={'-1':'01-main',0:'04-prologue',1:'06-night-record',2:'01-main',3:'07-memorial',4:'02-tension',
+  5:'05-ferry',6:'05-ferry',7:'08-grain',8:'02-tension',9:'09-lesson',10:'07-memorial',11:'02-tension',12:'06-night-record',13:'10-dawn',14:'10-dawn'};
+const endingTracks=[['03-evening','03-evening','03-evening'],['05-ferry','05-ferry','07-memorial'],['08-grain','08-grain','08-grain'],
+  ['03-evening','03-evening','03-evening'],['09-lesson','03-evening','03-evening'],['07-memorial','03-evening','03-evening']];
+function sceneTrack(){
+  const p=state.page;
+  if(p>=15){
+    if(state.finalRecordOpen)return 's1-01-main';
+    return 's1-'+((endingTracks[state.rank]||[])[state.ending]||'03-evening');
+  }
+  if(p===14&&state.rank===1&&state.rankLead!==undefined)return 's1-05-ferry';
+  return 's1-'+(pageTracks[p]||'01-main');
+}
 let musicEnabled=restore('music',true);
 let musicStarted=false;
 let currentTrack='';
@@ -122,7 +135,7 @@ function updateMusicControl(){
 
 function syncMusic(){
   if(!musicEnabled || !musicStarted){music.pause();updateMusicControl();return;}
-  const track=tracks[state.page>=15?2:state.page>=5?1:0];
+  const track=sceneTrack();
   if(track!==currentTrack){
     music.src='audio/'+track+'.mp3';
     currentTrack=track;
