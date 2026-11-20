@@ -1,0 +1,30 @@
+/* 휴대폰 한 컷 보기 (cut-mode.js) */
+.cut-bar{display:none}
+@media (max-width:640px){
+  .cut-bar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;align-items:center;gap:8px;
+    padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:rgba(16,24,20,.94);
+    border-top:1px solid rgba(243,234,216,.18);backdrop-filter:blur(4px)}
+  .cut-bar[hidden]{display:none}
+  .cut-bar button{font:inherit;font-size:.92rem;color:#f3ead8;background:transparent;border:1px solid rgba(243,234,216,.35);
+    border-radius:6px;padding:8px 12px;min-height:40px}
+  .cut-bar button:disabled{opacity:.3}
+  .cut-bar .cut-next{background:#f3d58d;color:#1a1a14;border-color:#f3d58d;font-weight:700}
+  .cut-bar .cut-toggle{margin-left:auto;font-size:.8rem;padding:6px 8px;opacity:.8}
+  .cut-count{color:#f3ead8;font-size:.9rem;min-width:52px;text-align:center}
+  .cut-bar [hidden]{display:none}
+  html.cut-mode body{padding-bottom:76px}
+  html.cut-mode .cut-hide{display:none!important}
+  /* 한 컷이 화면을 채우도록: 그림은 크게, 글은 그 아래 */
+  html.cut-mode section.comic-beat,html.cut-mode figure.beat,html.cut-mode section.frame,html.cut-mode section.story-cut{
+    display:block;margin:10px 0;cursor:pointer;animation:cut-in .18s ease-out}
+  html.cut-mode section.comic-beat>[aria-hidden="true"],html.cut-mode figure.beat>.art,
+  html.cut-mode section.frame>.picture,html.cut-mode section.story-cut>.story-picture{
+    width:100%;max-width:min(100%,48dvh);margin:0 auto 10px;max-height:none}
+  html.cut-mode .comic-beat .evidence-picture,html.cut-mode .comic-beat .dialogue-art,html.cut-mode figure.beat>.art.detail{max-width:min(100%,64dvh)}
+  html.cut-mode .beat-text p,html.cut-mode figcaption p,html.cut-mode .frame-caption{margin-bottom:6px}
+  html.cut-mode section.comic-beat.cut-first>[aria-hidden="true"],html.cut-mode figure.beat.cut-first>.art,html.cut-mode section.frame.cut-first>.picture,html.cut-mode section.story-cut.cut-first>.story-picture{max-width:min(100%,38dvh)}
+  @keyframes cut-in{from{opacity:.4;transform:translateX(12px)}to{opacity:1;transform:none}}
+}
+@media (max-width:640px) and (prefers-reduced-motion:reduce){
+  html.cut-mode section.comic-beat,html.cut-mode figure.beat,html.cut-mode section.frame,html.cut-mode section.story-cut{animation:none}
+}
