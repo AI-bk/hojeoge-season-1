@@ -192,13 +192,13 @@ function optionsFor(step){
   const options=[...acts[step].choices];
   if(step===0&&!handoff.witness){
     options[0]='제가 이 기록을 가져왔습니다';
-    options[1]='증인을 부를 자리를 마련해 달라고 한다';
+    options[1]='증인 부를 자리를 청한다';
   }
   if(step===1)options[0]=rankStories[handoff.rank][2];
-  if(step===5&&!nameKnown())options[0]='옷고름과 날짜가 맞는 부분을 먼저 낸다';
+  if(step===5&&!nameKnown())options[0]='맞는 물증부터 낸다';
   if(step===7&&!nameKnown()){
-    options[0]='죽은 아이의 빈 줄과 확인한 근거를 함께 남긴다';
-    options[2]='연이의 정정을 먼저 남기고 다른 아이의 단서는 봉인한다';
+    options[0]='빈 줄과 근거를 남긴다';
+    options[2]='연이만 고치고 단서는 봉한다';
   }
   return options;
 }
