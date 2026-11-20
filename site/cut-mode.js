@@ -1,11 +1,11 @@
-// 휴대폰 한 컷 보기: 화면에 만화 한 컷씩 보여 주고, 넘기기(스와이프·탭·버튼)로 다음 컷으로 간다.
+// 한 컷 보기: 화면에 만화 한 컷씩 보여 주고, 넘기기(스와이프·탭·버튼)로 다음 컷으로 간다.
 // 시즌 1~3 공통. 각 시즌 스크립트가 #reader를 다시 그릴 때마다 컷을 다시 나눈다.
 (function(){
   const reader=document.querySelector('#reader');
   if(!reader)return;
   const CUT='section.comic-beat, figure.beat, section.frame, section.story-cut, section.branch-cut';
   const KEY='hojeoge-cut-mode';
-  const mq=window.matchMedia('(max-width: 640px)');
+  const mq=window.matchMedia('(min-width: 0px)'); // 모든 화면에서 한 컷 보기 (넓은 화면은 그림·글을 나란히)
   let enabled=true;
   try{const v=localStorage.getItem(KEY);if(v!==null)enabled=v==='1';}catch(e){}
   let cuts=[],groups=[],index=0,busy=false;
