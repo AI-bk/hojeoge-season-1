@@ -76,3 +76,25 @@ html.cut-mode .cut-overlay.choices-below:not(.overlay-off){overflow:visible}
 html.cut-mode .cut-overlay.choices-below:not(.overlay-off)>:is(.beat-text,.frame-body,.story-text,figcaption){bottom:auto;height:var(--art-h,auto)}
 html.cut-mode .cut-overlay.choices-below:not(.overlay-off) .cut-choice-panel{position:static;background:#0c120f;padding:10px;border-radius:0 0 6px 6px}
 html.cut-mode .cut-overlay.choices-below:not(.overlay-off) :is(.dialogue,.speech):first-of-type{margin-top:auto!important}
+/* 그림을 덜 가리게: 해설은 그림 위쪽 띠(그림 밖), 말풍선은 작게 아래 가장자리, 이름은 대사와 한 줄 */
+html.cut-mode .cut-overlay:not(.overlay-off){overflow:visible;margin-top:calc(var(--narr-h,0px) + 10px)!important;border-radius:0}
+html.cut-mode .cut-overlay:not(.overlay-off)>[aria-hidden="true"],html.cut-mode .cut-overlay:not(.overlay-off)>.picture{border-radius:6px}
+html.cut-mode .cut-overlay:not(.overlay-off) .cut-narration{position:absolute;left:0;right:0;bottom:100%;max-width:none!important;
+  margin:0 0 6px!important;background:none!important;box-shadow:none!important;color:#efe6d2!important;padding:0 2px!important;font-size:.92rem!important}
+html.cut-mode .cut-overlay:not(.overlay-off)>:is(.beat-text,.frame-body,.story-text,figcaption){padding:8px;overflow:visible}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech){padding:4px 11px!important;max-width:74%;border-radius:13px;
+  background:rgba(255,253,246,.9)!important;margin-top:4px!important}
+html.cut-mode .cut-overlay:not(.overlay-off) .dialogue figcaption,html.cut-mode .cut-overlay:not(.overlay-off) .speech strong{display:inline;margin-right:6px;font-size:.72rem}
+html.cut-mode .cut-overlay:not(.overlay-off) .dialogue figcaption strong::after{content:''}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue blockquote,.speech q){display:inline;font-size:.86rem;line-height:1.4}
+html.cut-mode .cut-overlay:not(.overlay-off) .dialogue{display:block}
+html.cut-text-hidden.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech){opacity:0;transition:opacity .15s}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech){transition:opacity .15s}
+.cut-bar .cut-text{font-size:.8rem;padding:6px 8px;opacity:.85}
+.cut-bar button{white-space:nowrap}
+@media (max-width:440px){
+  .cut-bar{gap:6px;padding-left:8px;padding-right:8px}
+  .cut-bar button{padding:7px 10px;font-size:.88rem}
+  .cut-bar .cut-text,.cut-bar .cut-toggle{font-size:.72rem;padding:6px 7px}
+  .cut-count{min-width:40px;font-size:.85rem}
+}

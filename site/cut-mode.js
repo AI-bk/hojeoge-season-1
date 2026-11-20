@@ -21,7 +21,8 @@
   bar.innerHTML='<button type="button" class="cut-prev" aria-label="이전 컷">‹ 이전</button>'+
     '<span class="cut-count" aria-live="polite"></span>'+
     '<button type="button" class="cut-next" aria-label="다음 컷">다음 ›</button>'+
-    '<button type="button" class="cut-toggle">스크롤로 보기</button>';
+    (overlayPage?'<button type="button" class="cut-text" aria-pressed="false">글 숨기기</button>':'')+
+    '<button type="button" class="cut-toggle">스크롤</button>';
   document.body.appendChild(bar);
   const prevBtn=bar.querySelector('.cut-prev'),nextBtn=bar.querySelector('.cut-next'),count=bar.querySelector('.cut-count'),toggle=bar.querySelector('.cut-toggle');
 
@@ -52,6 +53,7 @@
     for(const m of moved.reverse()){try{m.parent.insertBefore(m.el,m.next&&m.next.parentNode===m.parent?m.next:null);}catch(e){}}
     moved=[];
     reader.querySelectorAll('.cut-choice-panel').forEach(el=>el.remove());
+    reader.querySelectorAll('.cut-narration').forEach(el=>el.classList.remove('cut-narration'));
     reader.querySelectorAll('.cut-overlay').forEach(el=>el.classList.remove('cut-overlay','overlay-off','with-choices','choices-below'));
   }
   function overlay(cut,group){
@@ -66,9 +68,11 @@
     }else if(cut.querySelector('.choices')){panel=cut.querySelector('.choices');}
     if(panel)cut.classList.add('with-choices');
     if(observer)observer.takeRecords();
+    const narr=text&&text.querySelector(':scope>p:not(.speech), :scope>.frame-caption');
+    if(narr){narr.classList.add('cut-narration');cut.style.setProperty('--narr-h',narr.offsetHeight+'px');}
     // 그림 위에 다 들어가지 않으면 이 컷은 글을 그림 아래로
     const room=cut.clientHeight;
-    const need=(text?[...text.children].filter(el=>!el.classList.contains('choices')).reduce((h,el)=>h+el.offsetHeight+6,20):0)+(panel?panel.offsetHeight:0);
+    const need=(text?[...text.children].filter(el=>!el.classList.contains('choices')&&!el.classList.contains('cut-narration')).reduce((h,el)=>h+el.offsetHeight+6,20):0)+(panel?panel.offsetHeight:0);
     const textNeed=need-(panel?panel.offsetHeight:0);
     if(!text||room<120||textNeed>room+2)cut.classList.add('overlay-off');
     else if(need>room+2&&panel.classList.contains('cut-choice-panel')){ // 글은 그림 위, 선택지는 그림 바로 아래
@@ -81,7 +85,7 @@
     const on=active()&&cuts.length>1;
     document.documentElement.classList.toggle('cut-mode',on);
     bar.hidden=!mq.matches||cuts.length<2;
-    toggle.textContent=enabled?'스크롤로 보기':'한 컷씩 보기';
+    toggle.textContent=enabled?'스크롤':'한 컷씩';
     reader.querySelectorAll('.cut-hide,.cut-first').forEach(el=>el.classList.remove('cut-hide','cut-first'));
     if(cuts[0])cuts[0].classList.add('cut-first');
     if(on){
@@ -113,6 +117,11 @@
     if(active()&&cuts.length>1)window.scrollTo(0,Math.max(0,reader.getBoundingClientRect().top+window.scrollY-8));
   }
 
+  const textBtn=bar.querySelector('.cut-text');
+  if(textBtn)textBtn.onclick=()=>{
+    const hide=document.documentElement.classList.toggle('cut-text-hidden');
+    textBtn.textContent=hide?'글 보기':'글 숨기기';textBtn.setAttribute('aria-pressed',hide?'true':'false');
+  };
   prevBtn.onclick=()=>go(index-1);
   nextBtn.onclick=()=>go(index+1);
   toggle.onclick=()=>{
