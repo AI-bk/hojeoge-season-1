@@ -249,6 +249,17 @@ function finalOutcome(){
   if(a[7]===0&&nameKnown()&&evidence>=3)return 'record';
   return 'pending';
 }
+// 시즌 3 신분 목표: 시즌 2에서 지킨 것, 2막에서 신분 증거를 낸 것, 6·7막의 선택을 더한다.
+function rankGoalDone3(){
+  const a=progress.answers,rank=handoff.rank;
+  let score=(handoff.rankGoal?.done?1:0)+(a[1]===0?1:0);
+  if(rank===2&&a[6]===0)score++;          // 윗사람의 수결부터 조사: 쌀을 받아 간 관원이 드러난다
+  if(rank===3&&(a[6]===0||a[2]===0))score++; // 수결의 주인을 가린다
+  if(rank===4&&a[5]===1)score++;          // 직접 본 사람의 진술: 사랑채 사람들의 말이 남는다
+  if(rank===5&&(a[6]===2||a[4]===2))score++; // 봉인을 나누어 보관한다
+  if(handoff.journey?.papers==='damp')score--;
+  return score>=2;
+}
 function journeyNote(j){
   return [{early:'새벽 첫 줄로 들어섰다',late:'해가 높이 뜬 뒤에 들어섰다'}[j.arrival],
     {intact:'원본은 마른 채 온전했다',partial:'원본 몇 장은 사본이었다',damp:'젖은 날짜 한 자리는 다른 증거로 메웠다'}[j.papers],
@@ -268,8 +279,17 @@ function ending(){
   const responsibility=examined?'날짜를 고친 수결은 별도 조사에 넘어갔다.':progress.answers[6]===1?'서로 다른 증언이 다음 조회의 질문으로 남았다.':'원본과 진술은 별개의 봉인으로 보관됐다.';
   const closing={record:['S3-09','윤석이 마지막 붓을 거두었다. 비워 두었던 옆줄에 처음으로 난희의 이름이 들어갔다.'],voices:['S3-10','해가 오르는 마당에 그날 말한 사람들이 서 있었다. 누구도 남의 말을 대신하지 않았다.'],seal:['S3-11','등불 아래 두 봉투가 남았다. 하나는 오늘 끈이 풀렸고, 다른 하나는 약속한 날까지 묶여 있다.'],pending:['S3-12','판관이 남긴 빈 줄 앞에서 이서는 붓을 들지 않았다. 비워 둔 것도 기록이라고 여겼다.']}[outcome];
   const closingFrame=hasNewCut(closing[0])?frame(...newCut(closing[0]),closing[1]):'';
-  reader.innerHTML=heading('시즌 3 완 · '+rankStories[handoff.rank][0],title)+frame(...newCut('S3-18','r',1),caption,'이서',line)+closingFrame+remedy+frame('s',8,'해가 뜨자 궁문 바깥까지 발소리가 들렸다. '+responsibility)+
-    '<section class="verdict"><h2>궁에 남은 기록</h2><dl><dt>이서의 신분</dt><dd>'+text(rankStories[handoff.rank][0])+'</dd><dt>기록의 결말</dt><dd>'+text(title)+'</dd>'+(handoff.journey?'<dt>궁에 들기까지</dt><dd>'+text(journeyNote(handoff.journey))+'</dd>':'')+'</dl></section>';
+  const done=rankGoalDone3();
+  const [goalName,win,lose,places]=rankGoals3[handoff.rank];
+  const [gslot,gsheet,gcut,gcaption,gspeaker,gline]=done?win:lose;
+  const goalFrame=frame(...newCut(gslot,gsheet,gcut),gcaption,gspeaker,gline);
+  const place=places[done?0:1];
+  const entryFrame=frame(...newCut('S3-'+({2:53,3:54,4:55,5:56}[handoff.rank]),'r',14),
+    '며칠 뒤, 날짜를 고치라 지시한 쪽지가 장부 틈에서 나왔다. 귀퉁이에는 대비전 지밀의 인장이, 접힌 안쪽에는 별채의 매듭이 남아 있었다. '+verdictHooks[outcome]+' 이서는 '+place.split('.')[0]+'.',
+    '이서','여기서 멈추면 저 문 안쪽은 아무도 묻지 않을 거예요. 이번엔 제가 안으로 들어가겠습니다.');
+  try{localStorage.setItem('yeocheon-season-four-v1handoff:'+storageKey,JSON.stringify({version:1,rank:handoff.rank,verdict:outcome,rankGoal:{name:goalName,done},entry:place,journey:handoff.journey??null,witness:handoff.witness??null,answers:[...progress.answers]}));}catch(e){}
+  reader.innerHTML=heading('시즌 3 완 · '+rankStories[handoff.rank][0],title)+frame(...newCut('S3-18','r',1),caption,'이서',line)+closingFrame+remedy+frame('s',8,'해가 뜨자 궁문 바깥까지 발소리가 들렸다. '+responsibility)+goalFrame+entryFrame+
+    '<section class="verdict"><h2>궁에 남은 기록</h2><dl><dt>이서의 신분</dt><dd>'+text(rankStories[handoff.rank][0])+'</dd><dt>기록의 결말</dt><dd>'+text(title)+'</dd>'+'<dt>신분의 몫</dt><dd>'+text(goalName+' · '+(done?'이룸':'놓침'))+'</dd><dt>시즌 4 · 궁 안의 이름</dt><dd>'+text(place)+'</dd>'+(handoff.journey?'<dt>궁에 들기까지</dt><dd>'+text(journeyNote(handoff.journey))+'</dd>':'')+'</dl></section>';
   reader.querySelector('.verdict').append(button('다른 선택으로 다시 읽기',()=>saveChange(()=>{
     progress={answers:[],reaction:false};
   })));

@@ -160,6 +160,22 @@ function endingDetail(answers){
 }
 function endingIndex(answers){return endingDetail(answers).id;}
 // 궁문 앞 실패가 겹치면 시즌 3로 가지 못하는 결말이 된다. 신분이 높을수록 여러 불운이 겹쳐야만 이르게 된다.
+// 시즌 2 신분 목표: 신분별 선택과 여정이 지킨 것을 본다.
+function rankGoalDone(answers){
+  const a=answers,j=journeyAt(a),rank=inherited.rank;
+  if(rank===2)return (a[1]===2||a[4]===2)&&j.pursuit!=='ahead';
+  if(rank===3)return castAt(a).escort==='gate'||((a[1]===1||a[4]===1)&&j.pursuit!=='ahead'); // 문재가 궁문까지 함께 왔으면 먼저 끌려갈 수 없다
+  if(rank===4)return a[4]!==2&&j.pursuit!=='ahead';
+  return (a[0]===0||a[1]===0||a[5]===0)&&j.pursuit!=='ahead';
+}
+function rankGoalPanel(done){
+  const [,win,lose]=rankGoals2[inherited.rank];
+  const [slot,[kind,cut],caption,lines]=done?win:lose;
+  // 동행인이 여천에 남았다면 그 사람의 말은 맡겨 둔 쪽지로 전한다.
+  const away=castAt(progress.answers).escort==='stayed';
+  const said=lines.map(([who,line])=>away&&who===route.companion?[who+'의 쪽지',line]:[who,line]);
+  return panel(...withNew(slot,[kind,cut]),caption,said);
+}
 function fatalEnding(answers){
   if(answers.length!==8)return null;
   const d=endingDetail(answers);
@@ -245,7 +261,8 @@ function gateRecord(){
     ending:id,focus,accepted,witness,document,
     witnessAccount:answers[4]===1?'공개 범위를 확인한 진술':'직접 본 일만 기록하는 조건',
     routeSelections:[...answers],characters:cast,discipline:cast.sanction,location:'궁문 바깥',
-    journey:{...journeyRecord(answers,cast),effect:endingDetail(answers).effect}
+    journey:{...journeyRecord(answers,cast),effect:endingDetail(answers).effect},
+    rankGoal:{name:rankGoals2[inherited.rank][0],done:rankGoalDone(answers)}
   };
 }
 // ── 여정 상태 (season-2-story.js의 journeyBase·journeyDeltas). 화면에는 숫자 대신 장면과 대사로만 드러난다.
@@ -556,8 +573,9 @@ function finale(){
   reader.innerHTML='<div class="chapter">시즌 2 엔딩 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(title)+'</h2>'+
     (record.journey.effect?panel(...journeyTurns[record.journey.effect]):'')+
     panel(kind,cut,arrival,[['이서',lead],arrivalEndings[id][4]])+
-    gateMoment(id,record)+journeyPanel(record)+seoEnding+punishment+panel('n',13,doorCaption,[['문 너머의 목소리',doorLine]])+
+    gateMoment(id,record)+journeyPanel(record)+seoEnding+punishment+rankGoalPanel(record.rankGoal.done)+panel('n',13,doorCaption+' 문 안쪽에서는 최 상궁이 이서의 이름이 적힌 명단을 받아 들고 있었다.',[['문 너머의 목소리',doorLine]])+
     '<section class="gate-record" aria-label="시즌 2 종료 기록"><p class="chapter">시즌 2 완 · 궁문 바깥</p><h2>궁문 앞에 남긴 기록</h2><dl><dt>이서의 신분</dt><dd>'+escaped(route.rank)+'</dd><dt>문 앞의 상황</dt><dd>'+escaped(material)+'</dd><dt>궁문 밖에 온 사람</dt><dd>'+escaped(record.characters.gatePeople.slice(2).join(' · ')||'이서 홀로 도착')+'</dd>'+
+    '<dt>신분의 몫</dt><dd>'+escaped(record.rankGoal.name+' · '+(record.rankGoal.done?'지켜 냄':'놓침'))+'</dd>'+
     '<dt>길의 사정</dt><dd>'+escaped(['arrival','body','papers','companion','pursuit'].map(k=>journeyWords[k][record.journey[k]]).join(' · '))+'</dd>'+
     (record.discipline?'<dt>관아의 처분</dt><dd>'+escaped(record.discipline.person+' · '+record.discipline.sanction)+'</dd>':'')+'</dl>'+
     '<p>시즌 3는 이 문이 열리는 순간부터 시작됩니다.</p>'+(transferred?'<p><a class="link primary" href="season-3.html">시즌 3 이어 읽기</a></p>':'<p class="intro">이 브라우저에 다음 시즌 기록을 저장하지 못했습니다.</p>')+'</section>';
