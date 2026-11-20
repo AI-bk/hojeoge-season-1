@@ -260,6 +260,48 @@ function rankGoalDone3(){
   if(handoff.journey?.papers==='damp')score--;
   return score>=2;
 }
+// ── 궁 안의 위험: 시즌 2에서 들고 온 약점과 시즌 3에서 앞세운 선택이 쌓인다.
+// 신분이 높을수록 더 쌓인다. 양민의 서류는 아무도 눈여겨보지 않지만, 양반·왕족이 기록을 들추면
+// 그 이름에 걸린 집안과 당파, 대비전까지 먼저 움직인다.
+function heat3(answers){
+  const h=handoff,j=h.journey||{};
+  let heat=1;
+  heat+=({2:0,3:1,4:2,5:3})[h.rank]??0;
+  if(h.rank===2&&!h.accepted)heat++; // 양민은 접수되지 못한 서류를 감싸 줄 이름이 없다
+  heat+=j.pursuit==='ahead'?2:j.pursuit==='followed'?1:0;
+  if(j.papers==='damp')heat++;
+  if(!h.accepted)heat++;
+  if(h.rankGoal&&!h.rankGoal.done)heat++;
+  if(!h.witness)heat++;
+  answers.forEach(pick=>{heat+=pick===0?1:pick===2?-1:0;});
+  return heat;
+}
+// 그 막에서 고른 행동이 쌓인 위험과 겹치면 궁에서 밀려난다.
+function midFatal3(answers){
+  const k=answers.length-1,a=answers,h=heat3(answers);
+  if(k===1&&a[1]===0&&(handoff.journey?.papers==='damp'?h>=6:h>=8))return 'framed';
+  if(k===2&&a[2]===0&&h>=6)return 'poisoned';
+  if(k===3&&a[3]===1&&h>=5&&handoff.rank!==5)return 'accused'; // 왕족을 나인 실종의 범인으로 몰지는 못한다
+  if(k===4&&a[4]===1&&h>=5)return 'arson';
+  if(k===5&&a[5]===0&&!handoff.witness&&h>=5&&handoff.rank<=3)return 'flogged'; // 양반·왕족에게는 곤장을 치지 못한다
+  if(k===6&&a[6]===0&&h>=6)return 'vanished';
+  return null;
+}
+function palaceFall(answers){
+  for(let n=2;n<=Math.min(answers.length,7);n++){const fate=midFatal3(answers.slice(0,n));if(fate)return {fate,at:n};}
+  return null;
+}
+function fatal3(fall){
+  progress.answers=progress.answers.slice(0,fall.at);
+  const step=fall.at-1,pick=progress.answers[step];
+  const [title,place,beats]=fatalEndings3[fall.fate];
+  reader.innerHTML=heading('방금 고른 행동',optionsFor(step)[pick])+heading('시즌 3 완 · 궁에서 밀려나다',title,'h2')+
+    beats.map(([slot,sheet,cut,caption,speaker,line])=>frame(...newCut(slot||'',sheet,cut),caption,speaker||undefined,line||undefined)).join('')+
+    '<section class="verdict"><h2>궁에 남은 기록</h2><dl><dt>이서의 신분</dt><dd>'+text(rankStories[handoff.rank][0])+'</dd><dt>이서가 있는 곳</dt><dd>'+text(place)+'</dd></dl><p>이 길에서는 궁 안의 일을 끝까지 묻지 못했습니다.</p></section>';
+  const box=reader.querySelector('.verdict');
+  box.append(button('방금 고른 선택 다시 하기',()=>saveChange(()=>{progress.answers=progress.answers.slice(0,-1);progress.reaction=false;})));
+  box.append(button('시즌 3 처음부터 다시 읽기',()=>saveChange(()=>{progress={answers:[],reaction:false};})));
+}
 function journeyNote(j){
   return [{early:'새벽 첫 줄로 들어섰다',late:'해가 높이 뜬 뒤에 들어섰다'}[j.arrival],
     {intact:'원본은 마른 채 온전했다',partial:'원본 몇 장은 사본이었다',damp:'젖은 날짜 한 자리는 다른 증거로 메웠다'}[j.papers],
@@ -297,6 +339,8 @@ function ending(){
 function render(focus=false,message=''){
   if(!handoff){
     reader.innerHTML=heading('시즌 3','문 안의 이름')+'<section class="missing"><p>이 브라우저에서 시즌 2의 궁문 결말을 열면, 그때 도착한 사람과 기록을 들고 시즌 3를 시작할 수 있어요.</p><a class="link" href="season-2.html">시즌 2로 돌아가기</a></section>';
+  }else if(palaceFall(progress.answers)){
+    fatal3(palaceFall(progress.answers));
   }else if(progress.reaction){
     const last=progress.answers.length-1;
     reaction(last,progress.answers[last]);

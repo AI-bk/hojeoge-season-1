@@ -157,9 +157,11 @@ for(const rank of [2,3,4,5]){
   storage.set(s1key,JSON.stringify({...legacy,page:15,rank,ending:0,rankLead:1,departureRank:rank}));
   const probe=open(s2);
   const current=probe.value('currentKey');
+  // 길 위에서 무너지지 않는 앞 선택(신분마다 다르다)을 찾아 쓴다
+  const safeFor=need=>probe.value(`(()=>{for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}if(${need}&&!roadFall(a.slice(0,7)))return a;}})()`);
+  const base=safeFor('a[3]===0'),alt=safeFor('a[3]===1');
   for(let step=0;step<7;step++)for(let option=0;option<3;option++){
-    const answers=Array(step).fill(0);
-    if(step===6&&option===1)answers[3]=1;
+    const answers=(step===6&&option===1?alt:base).slice(0,step);
     storage.set(current,JSON.stringify({answers,reaction:step>0}));
     const selecting=open(s2);
     assert.equal(selecting.buttons().length,3);

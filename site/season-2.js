@@ -200,9 +200,9 @@ function midFatal(answers){
   const j=journeyAt(answers),rank=inherited.rank,low=rank<=3,a=answers;
   const cast=castAt(answers);
   const alone=cast.escort!=='travel'&&cast.myeongseon!=='travel';
-  if(k===2&&a[2]===2&&j.exposure>=({2:1,3:2}[rank]??4))return 'checkpoint';      // 이미 노출된 채 남의 표에 기대 검문소를 지나려 했다
+  if(k===2&&a[2]===2&&j.exposure>=({2:2,3:2,4:3,5:2}[rank]??2))return 'checkpoint';      // 이미 노출된 채 남의 표에 기대 검문소를 지나려 했다. 이름이 알려진 집안일수록 검문소에 먼저 기별이 닿아 있다
   if(k===3&&a[3]===1&&j.purse<=({2:-4,3:-3}[rank]??-3))return 'collapsed';         // 바닥난 노자로 명선의 몫까지 떠안았다
-  if(k===4&&a[4]===0&&alone&&j.exposure>=(low?2:3))return 'ambushed';  // 혼자인데 조건을 거절해 적을 만들었다
+  if(k===4&&a[4]===0&&alone&&j.exposure>=(rank===2?3:2))return 'ambushed';  // 혼자인데 조건을 거절해 적을 만들었다. 높은 이름일수록 노리는 쪽이 사람을 산다
   if(k===4&&rank===4&&a[4]===2&&j.exposure>=3&&cast.escort!=='travel')return 'recalled';   // 문중에 서면 답을 청하자 문중이 먼저 움직였다
   if(k===4&&rank===5&&a[4]===0&&j.exposure>=3)return 'confined';   // 별채의 요구를 거절한 왕족을 별채가 손님으로 데려갔다
   if(k===5&&j.pursuit==='ahead'&&(low?a[5]!==1:a[5]===2&&alone))return 'seized';             // 소문이 앞선 도성에서 사람 대신 종이에 기댔다

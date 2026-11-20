@@ -53,9 +53,14 @@ const itineraries=[
   [0,0,0,0,2,2,2,2],
   [0,0,0,2,0,2,1,1]
 ];
+// 궁 안의 실패(palaceFall)를 피하면서 각 결말에 닿는 길을 신분마다 찾는다.
+const reached=new Set();
 for(const rank of [2,3,4,5]){
-  for(const [outcome,picks] of Object.entries(records)){
+  for(const [outcome] of Object.entries(records)){
     let game=join(rank,itineraries[Object.keys(records).indexOf(outcome)]);
+    const picks=game.eval(`(()=>{const keep=progress.answers;let found=null;for(let n=0;n<6561&&!found;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}if(palaceFall(a))continue;progress.answers=a;if(finalOutcome()==='${outcome}')found=a;}progress.answers=keep;return found})()`);
+    if(!picks)continue; // 이 신분·이 도착 상태로는 궁 안의 위험 때문에 닿을 수 없는 결말
+    reached.add(outcome);
     assert.equal(game.eval('handoff.rank'),rank);
     assert.match(game.dom.markup,/궁문 걸쇠가 밀렸다/);
     assert.equal(game.options().length,3);
@@ -85,6 +90,21 @@ for(const rank of [2,3,4,5]){
     assert.match(game.dom.markup,/방금 고른 행동/);
   }
 }
+assert.equal(reached.size,4,'all four finales reachable without falling');
+// 궁 안의 실패 결말: 신분마다 실패할 길이 있고, 다시 하기로 돌아갈 수 있다
+for(const rank of [2,3,4,5]){
+  let game=join(rank,itineraries[1]);
+  const fall=game.eval('(()=>{for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}const f=palaceFall(a);if(f)return a.slice(0,f.at);}return null})()');
+  assert.ok(fall,'palace fall reachable for rank '+rank);
+  storage.set(game.eval('storageKey'),JSON.stringify({answers:fall,reaction:true}));
+  game=open(3);
+  assert.match(game.dom.markup,/궁에서 밀려나다/);
+  assert.doesNotMatch(game.dom.markup,/시즌 4 · 궁 안의 이름/);
+}
+// 신분이 높을수록 궁 안에서 노리는 쪽이 많아 실패할 길도 많다
+const probe3=join(2,itineraries[1]);
+const falls=[2,3,4,5].map(rank=>probe3.eval('(()=>{const keep=JSON.stringify(handoff);Object.assign(handoff,{rank:'+rank+',accepted:true,journey:{pursuit:\'followed\',papers:\'partial\'},rankGoal:{done:true}});let c=0;for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}if(palaceFall(a))c++;}Object.assign(handoff,JSON.parse(keep));return c})()'));
+assert.ok(falls[0]<falls[1]&&falls[1]<falls[2]&&falls[2]<falls[3],'higher ranks fall more often: '+falls);
 for(const [idx,two] of itineraries.entries()){
  const game=join(2,two);
  if(idx===0)assert.match(game.dom.markup,/문 주부/);
@@ -100,7 +120,8 @@ for(let step=0;step<8;step++){
   for(let pick=0;pick<3;pick++){
     let game=join(5,itineraries[0]);
     const key=game.eval('storageKey');
-    storage.set(key,JSON.stringify({answers:Array(step).fill(0),reaction:false}));
+    const safe=game.eval('(()=>{for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}if(!palaceFall(a))return a;}})()').slice(0,step);
+    storage.set(key,JSON.stringify({answers:safe,reaction:false}));
     game=open(3);
     game.pick(pick);
     outcomes.add(game.dom.markup);
