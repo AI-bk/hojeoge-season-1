@@ -54,10 +54,11 @@ function button(label,fn,className=''){
 }
 function frame(sheet,cut,caption,speaker,line,actionClass='narrative'){
   const size=sheet==='s'?3:4;
-  const rows=sheet==='g'?5:size; // 새 컷 그림판은 4x5
+  const rows=sheet==='g'?(typeof NEW_CUT_ROWS_3==='number'?NEW_CUT_ROWS_3:5):size; // 새 컷 그림판은 4열, 줄 수는 빌드가 정한다
   const x=(cut%size)*100/(size-1);
   const y=Math.floor(cut/size)*100/(rows-1);
-  const art='<div class="picture '+(sheet==='s'?'scene':sheet==='g'?'new':'reaction')+'-picture" data-cut="'+sheet+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
+  const sizing=sheet==='g'?';background-size:400% '+rows*100+'%':'';
+  const art='<div class="picture '+(sheet==='s'?'scene':sheet==='g'?'new':'reaction')+'-picture" data-cut="'+sheet+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%'+sizing+'"></div>';
   const words=speaker&&line?'<p class="speech"><strong>'+text(speaker)+'</strong><q>'+text(line)+'</q></p>':'';
   return '<section class="frame '+actionClass+'">'+art+'<div class="frame-body">'+(caption?'<p class="frame-caption">'+text(caption)+'</p>':'')+words+'</div></section>';
 }
@@ -86,6 +87,7 @@ function spoken(sheet,cut,caption,speaker,line){
 }
 const witnessSlots={'명선':'S3-01','서겸':'S3-02','한 노인':'S3-03','백문재':'S3-04','정윤':'S3-05','박 유모':'S3-06'};
 function extraBuildup(step){
+  if(step===1&&hasNewCut('S3-44'))return frame(...newCut('S3-44'),'기록청 깊은 방. 최 상궁이 문을 열게 하자 윤석이 상자에서 원장을 꺼냈다. 이서는 상궁 곁에서 그 끈을 내려다보았다.');
   if(step===2&&hasNewCut('S3-07'))return frame(...newCut('S3-07'),'궁 안 약방. 의관 이현이 약재 서랍 앞에서 이서를 맞았다. 윤석이 미리 기별을 넣어 둔 참이었다.','이현','기록관이 보냈다고 들었습니다. 제 장부는 두 권인데, 어느 쪽부터 보시겠습니까?');
   if(step===4&&hasNewCut('S3-08'))return frame(...newCut('S3-08'),'밤이 깊었을 때, 등불을 든 사환이 상궁의 처소 문을 두드렸다. 윤석이 먼저 나와 사환이 내민 종이를 받아 들었고, 최 상궁은 문 안쪽에서 지켜보았다.','윤석','원장을 지금 다른 방으로 옮기라는 전갈입니다.');
   return '';
@@ -178,13 +180,17 @@ function decision(step){
   }))));
   reader.querySelector('.decision .frame-body').append(options);
 }
+function aftermath(step,pick){
+  const slot='S3-'+(20+step*3+pick);
+  return hasNewCut(slot)?frame(...newCut(slot),aftermathCaptions[step][pick]):'';
+}
 function reaction(step,pick){
   const act=acts[step];
   let [art,caption,speaker,line]=act.outcomes[pick];
   if(step===0&&pick===1&&handoff.witness){
     const words=handoff.witness==='명선'?'제가 들은 이름은 말할 수 있어요. 누구나 제 말을 다 읽을 수 있는 건지 먼저 알려 주세요.':handoff.witness==='서겸'?'제가 그 봉투를 받은 방은 압니다. 안에 든 글을 제가 쓴 건 아닙니다.':'제가 여천에서 직접 본 일부터 제 이름으로 말하겠습니다.';
     const next=frame('r',0,'최 상궁이 그 사람을 향해 몸을 돌렸다.','최 상궁','좋다. 이름과 네가 직접 본 일을 따로 받겠다.');
-    reader.innerHTML=heading('방금 고른 행동',optionsFor(step)[pick])+frame(...newCut(witnessSlots[handoff.witness]||'','r',3),caption,handoff.witness,words)+next;
+    reader.innerHTML=heading('방금 고른 행동',optionsFor(step)[pick])+frame(...newCut(witnessSlots[handoff.witness]||'','r',3),caption,handoff.witness,words)+next+aftermath(step,pick);
   }else{
     if(step===0&&!handoff.witness&&pick===0){
       line='네가 이 종이를 가져왔다는 말은 적어 두겠다. 누가 직접 봤는지는 장부를 연 뒤에 다시 묻는다.';
@@ -197,7 +203,7 @@ function reaction(step,pick){
     if(step===1&&pick===0)caption=rankStories[handoff.rank][3];
     if(step===3&&pick===0&&nameKnown())line='이 옷을 고친 날이 나인 장부의 수선 줄에 있어요. 그 줄에 적힌 이름은 난희예요.';
     if(step===7&&!nameKnown()&&pick===0)line='확인하지 못한 이름은 지금 쓰지 말아 주세요. 확인한 근거를 이 빈 줄 곁에 두겠습니다.';
-    reader.innerHTML=heading('방금 고른 행동',optionsFor(step)[pick])+spoken('r',art,caption,speaker,line);
+    reader.innerHTML=heading('방금 고른 행동',optionsFor(step)[pick])+spoken('r',art,caption,speaker,line)+aftermath(step,pick);
   }
   reader.querySelector('.frame:last-of-type .frame-body').append(button('다음 컷',()=>saveChange(()=>{progress.reaction=false;}),'inline-action'));
 }
