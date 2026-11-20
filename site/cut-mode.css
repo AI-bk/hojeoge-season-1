@@ -39,3 +39,40 @@ html.cut-mode .beat-text p,html.cut-mode figcaption p,html.cut-mode .frame-capti
   html.cut-mode section.comic-beat.cut-first>[aria-hidden="true"],html.cut-mode figure.beat.cut-first>.art,html.cut-mode section.story-cut.cut-first>.story-picture{width:min(440px,calc(100dvh - 330px))}
   html.cut-mode section.frame.cut-first>.picture{max-width:calc(100dvh - 330px)}
 }
+
+/* 말풍선 보기 (body.overlay-cuts): 해설은 그림 위쪽 상자, 대사는 아래쪽 말풍선, 선택지는 그림 아래쪽 패널 */
+html.cut-mode .cut-overlay:not(.overlay-off){position:relative;display:block!important;padding:0!important;border:0!important;
+  background:none!important;width:100%;max-width:min(100%,calc(100dvh - 190px));margin:6px auto!important;overflow:hidden;border-radius:6px}
+html.cut-mode .cut-overlay:not(.overlay-off)>[aria-hidden="true"],html.cut-mode .cut-overlay:not(.overlay-off)>.picture,
+html.cut-mode .cut-overlay:not(.overlay-off)>.art,html.cut-mode .cut-overlay:not(.overlay-off)>.story-picture{
+  display:block;width:100%!important;max-width:none!important;max-height:none!important;margin:0!important;border:0}
+html.cut-mode .cut-overlay:not(.overlay-off)>:is(.beat-text,.frame-body,.story-text,figcaption){
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:flex-start;padding:10px;margin:0;pointer-events:none;overflow:hidden;background:none}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.beat-text>p,.frame-caption,.story-text>p,figcaption>p){
+  background:rgba(250,244,228,.94);color:#2a2418;font-size:.86rem;line-height:1.45;padding:6px 10px;border-radius:3px;
+  max-width:88%;margin:0 0 6px;box-shadow:0 1px 4px rgba(0,0,0,.35);border:0}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech){
+  margin:6px 0 0!important;background:#fffdf6!important;color:#1e1e1e!important;border:0!important;border-radius:16px;
+  padding:6px 13px!important;max-width:86%;box-shadow:0 1px 5px rgba(0,0,0,.4);line-height:1.45}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech):first-of-type{margin-top:auto!important}
+html.cut-mode .cut-overlay.with-choices:not(.overlay-off) :is(.dialogue,.speech):first-of-type{margin-top:0!important}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech):nth-of-type(2n){align-self:flex-end}
+html.cut-mode .cut-overlay:not(.overlay-off) .dialogue figcaption,html.cut-mode .cut-overlay:not(.overlay-off) .speech strong{
+  display:block;font-size:.74rem;color:#6b5a35!important;margin:0 0 1px;background:none;padding:0;box-shadow:none}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue blockquote,.speech q){margin:0;font-size:.92rem;color:#1e1e1e!important;display:block}
+html.cut-mode .cut-overlay:not(.overlay-off) .cut-choice-panel,
+html.cut-mode .cut-overlay:not(.overlay-off)>.frame-body>.choices{
+  position:absolute;left:0;right:0;bottom:0;z-index:2;padding:30px 10px 10px;pointer-events:auto;
+  background:linear-gradient(rgba(12,18,15,0),rgba(12,18,15,.9) 26px)}
+html.cut-mode .cut-overlay:not(.overlay-off) .cut-choice-panel :is(.decision-stakes,.decision-question,.comic-flow){margin:0 0 6px;padding:0;color:#f3ead8;font-size:.82rem;line-height:1.4}
+html.cut-mode .cut-overlay:not(.overlay-off) .cut-choice-panel .decision-question{color:#f3d58d;font-size:1rem}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.cut-choice-panel,.frame-body) .choices{display:flex;flex-direction:column;gap:6px;margin:0}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.cut-choice-panel,.frame-body) .choices button{
+  width:100%;margin:0;text-align:left;background:rgba(20,30,25,.72);color:#fffaf0;border:1px solid rgba(243,213,141,.75);
+  border-radius:8px;padding:9px 12px;font-size:.95rem;backdrop-filter:blur(2px)}
+html.cut-mode .cut-overlay.overlay-off .cut-choice-panel{position:static;background:none;padding:6px 0}
+html.cut-mode .cut-overlay:not(.overlay-off) .dialogue figcaption strong{color:#6b5a35!important}
+html.cut-mode .cut-overlay.choices-below:not(.overlay-off){overflow:visible}
+html.cut-mode .cut-overlay.choices-below:not(.overlay-off)>:is(.beat-text,.frame-body,.story-text,figcaption){bottom:auto;height:var(--art-h,auto)}
+html.cut-mode .cut-overlay.choices-below:not(.overlay-off) .cut-choice-panel{position:static;background:#0c120f;padding:10px;border-radius:0 0 6px 6px}
+html.cut-mode .cut-overlay.choices-below:not(.overlay-off) :is(.dialogue,.speech):first-of-type{margin-top:auto!important}

@@ -8,7 +8,12 @@
   const mq=window.matchMedia('(min-width: 0px)'); // 모든 화면에서 한 컷 보기 (넓은 화면은 그림·글을 나란히)
   let enabled=true;
   try{const v=localStorage.getItem(KEY);if(v!==null)enabled=v==='1';}catch(e){}
-  let cuts=[],groups=[],index=0,busy=false;
+  let cuts=[],groups=[],index=0,busy=false,observer=null,moved=[];
+  // 말풍선 보기: 글(해설 상자·대사 말풍선)과 선택지를 그림 위에 얹는다. 페이지가 body.overlay-cuts로 켠다.
+  // 글이 그림을 넘치는 컷은 그 컷만 예전처럼 그림 아래에 글을 둔다.
+  const overlayPage=document.body.classList.contains('overlay-cuts');
+  const TEXT=':scope>.beat-text, :scope>.frame-body, :scope>.story-text, :scope>figcaption';
+  const CHOICEY='.choices, .decision-question, .decision-stakes';
 
   const bar=document.createElement('nav');
   bar.className='cut-bar';
@@ -43,8 +48,36 @@
       if(groups[owner])groups[owner].push(el);
     }
   }
+  function restore(){
+    for(const m of moved.reverse()){try{m.parent.insertBefore(m.el,m.next&&m.next.parentNode===m.parent?m.next:null);}catch(e){}}
+    moved=[];
+    reader.querySelectorAll('.cut-choice-panel').forEach(el=>el.remove());
+    reader.querySelectorAll('.cut-overlay').forEach(el=>el.classList.remove('cut-overlay','overlay-off','with-choices','choices-below'));
+  }
+  function overlay(cut,group){
+    cut.classList.add('cut-overlay');
+    const text=cut.querySelector(TEXT);
+    const after=group.filter(el=>(cut.compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING)&&(el.matches(CHOICEY)||el.querySelector(CHOICEY)));
+    let panel=null;
+    if(after.length){
+      panel=document.createElement('div');panel.className='cut-choice-panel';
+      for(const el of after){moved.push({el,parent:el.parentNode,next:el.nextSibling});panel.append(el);}
+      cut.append(panel);
+    }else if(cut.querySelector('.choices')){panel=cut.querySelector('.choices');}
+    if(panel)cut.classList.add('with-choices');
+    if(observer)observer.takeRecords();
+    // 그림 위에 다 들어가지 않으면 이 컷은 글을 그림 아래로
+    const room=cut.clientHeight;
+    const need=(text?[...text.children].filter(el=>!el.classList.contains('choices')).reduce((h,el)=>h+el.offsetHeight+6,20):0)+(panel?panel.offsetHeight:0);
+    const textNeed=need-(panel?panel.offsetHeight:0);
+    if(!text||room<120||textNeed>room+2)cut.classList.add('overlay-off');
+    else if(need>room+2&&panel.classList.contains('cut-choice-panel')){ // 글은 그림 위, 선택지는 그림 바로 아래
+      cut.style.setProperty('--art-h',room+'px');cut.classList.add('choices-below');
+    }else if(need>room+2)cut.classList.add('overlay-off');
+  }
   function show(){
     busy=true;
+    restore();
     const on=active()&&cuts.length>1;
     document.documentElement.classList.toggle('cut-mode',on);
     bar.hidden=!mq.matches||cuts.length<2;
@@ -58,9 +91,11 @@
       prevBtn.disabled=index===0;
       nextBtn.disabled=index===cuts.length-1;
       prevBtn.hidden=nextBtn.hidden=count.hidden=false;
+      if(overlayPage&&cuts[index])overlay(cuts[index],groups[index]||[]);
     }else{
       prevBtn.hidden=nextBtn.hidden=count.hidden=true;
     }
+    if(observer)observer.takeRecords();
     busy=false;
   }
   function go(i){
@@ -72,6 +107,7 @@
     window.scrollTo(0,Math.max(0,top));
   }
   function refresh(){
+    moved=[];
     split();index=0;show();
     // 새 장면이 열리면 머리 단추들을 지나 장면 제목부터 보이게 한다
     if(active()&&cuts.length>1)window.scrollTo(0,Math.max(0,reader.getBoundingClientRect().top+window.scrollY-8));
@@ -87,7 +123,7 @@
   };
   // 그림을 누르면 다음 컷(왼쪽 3분의 1은 이전 컷)
   reader.addEventListener('click',e=>{
-    if(!active()||e.target.closest('button,a,summary,details,input,label'))return;
+    if(!active()||e.target.closest('button,a,summary,details,input,label,.cut-choice-panel'))return;
     const cut=e.target.closest(CUT);
     if(!cut)return;
     const r=cut.getBoundingClientRect();
@@ -108,11 +144,13 @@
   });
 
   let queued=false;
-  new MutationObserver(()=>{
+  observer=new MutationObserver(()=>{
     if(busy||queued)return;
     queued=true;
     requestAnimationFrame(()=>{queued=false;refresh();});
-  }).observe(reader,{childList:true});
+  });
+  observer.observe(reader,{childList:true});
+  if(overlayPage)window.addEventListener('resize',()=>{if(active())show();});
   mq.addEventListener?mq.addEventListener('change',show):mq.addListener(show);
   refresh();
 })();
