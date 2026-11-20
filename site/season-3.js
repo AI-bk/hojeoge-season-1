@@ -86,6 +86,39 @@ function spoken(sheet,cut,caption,speaker,line){
   return frame(sheet,cut,caption)+frame(face[0],face[1],'',speaker,line);
 }
 const witnessSlots={'명선':'S3-01','서겸':'S3-02','한 노인':'S3-03','백문재':'S3-04','정윤':'S3-05','박 유모':'S3-06'};
+// 시즌 2의 여정(handoff.journey)이 궁 안에서 유리함·불리함으로 이어진다. 예전 기록에는 없으므로 없으면 넘어간다.
+function journeyFrame(step){
+  const j=handoff.journey;
+  if(!j)return '';
+  if(step===0){
+    const ill=j.body==='ill'?' 이서의 목소리는 길 위에서 오른 열로 쉬어 있었다.':'';
+    if(j.pursuit==='ahead')return frame(...speakerPortrait('최 상궁'),'최 상궁은 이서가 이르기 전에 이미 쪽지 한 장을 받아 두었다. 여천에서 온 사람이 무엇을 들고 오는지 적힌 쪽지였다.'+ill,'최 상궁','네 이야기는 다른 입으로 먼저 들었다. 네 입으로 다시 듣고, 두 말이 같은지 보겠다.');
+    if(j.arrival==='late')return frame(...speakerPortrait('최 상궁'),'해가 높이 뜬 뒤였다. 최 상궁은 먼저 온 사람들의 이름을 다 부르고 나서야 이서를 불렀다.'+ill,'최 상궁','늦었구나. 기다린 사람이 많으니 요긴한 것부터 말하거라.');
+    return frame(...speakerPortrait('최 상궁'),'문을 연 최 상궁은 명단 첫 줄이 이서의 이름인 것을 보고 다른 사람보다 먼저 불렀다.'+ill,'최 상궁','가장 먼저 온 사람의 말부터 듣겠다. 다른 쪽 이야기는 그다음이다.');
+  }
+  if(step===2){
+    const [caption,line]={
+      intact:['이서가 펼친 원본은 마른 채 접힌 자리까지 또렷했다. 이현은 사본을 찾지 않고 바로 날짜를 맞춰 보았다.','원본이 이만하면 대조가 빠르겠군요. 사본은 덮어 두시오.'],
+      partial:['원본 몇 장은 사본으로만 남아 있었다. 이현은 사본마다 누가 언제 베꼈는지부터 물었다.','베낀 사람 이름이 있으면 됩니다. 없으면 그 줄은 내 장부와 맞춰 보지 않겠소.'],
+      damp:['젖어 번진 먹 때문에 날짜 한 자리를 읽을 수 없었다. 이현은 그 자리를 비워 둔 채 나머지만 맞춰 보았다.','젖은 자리를 짐작으로 채우진 않겠소. 그 날짜는 다른 증거로 메우시오.']
+    }[j.papers]||[];
+    return caption?frame(...speakerPortrait('이현'),caption,'이현',line):'';
+  }
+  if(step===4){
+    const [caption,line]={
+      quiet:['원장을 옮기라는 한밤의 명은 늦게 왔다. 그 전에 윤석은 원장을 둔 방의 명부에 이서의 이름을 함께 적어 두었다.','늦게 와 준 덕에 봉인할 틈이 있었소. 오늘 밤은 서두르지 않아도 되오.'],
+      followed:['이서가 도성에 든 날부터 뒤를 밟던 사람이 기록청 앞까지 와 있었다. 원장을 옮기라는 명이 하루 일찍 내려왔다.','누가 이 방 시각을 알려 주었는지 모르겠소. 오늘 밤 안에 정해야 하오.'],
+      ahead:['이서가 궁에 들기도 전에 원장을 옮기라는 명이 먼저 와 있었다. 윤석은 문서 상자 하나를 벌써 내준 뒤였다.','한 상자는 이미 나갔소. 남은 것이라도 지금 봉해야 하오.']
+    }[j.pursuit]||[];
+    return caption?frame(...speakerPortrait('윤석'),caption,'윤석',line):'';
+  }
+  if(step===5&&j.companion!=='none'){
+    return j.companion==='steady'
+      ? frame('r',7,'궁문까지 함께 온 사람은 조회 자리 뒤편에 앉아 이서와 눈을 맞췄다. 부르면 언제든 나설 수 있었다.')
+      : frame('r',7,'궁문까지 함께 온 사람은 먼 길에 지쳐 오래 서 있지 못했다. 판관은 그 사람의 말을 앉은 채로 받으라고 했다.');
+  }
+  return '';
+}
 function extraBuildup(step){
   if(step===1&&hasNewCut('S3-44'))return frame(...newCut('S3-44'),'기록청 깊은 방. 최 상궁이 문을 열게 하자 윤석이 상자에서 원장을 꺼냈다. 이서는 상궁 곁에서 그 끈을 내려다보았다.');
   if(step===2&&hasNewCut('S3-07'))return frame(...newCut('S3-07'),'궁 안 약방. 의관 이현이 약재 서랍 앞에서 이서를 맞았다. 윤석이 미리 기별을 넣어 둔 참이었다.','이현','기록관이 보냈다고 들었습니다. 제 장부는 두 권인데, 어느 쪽부터 보시겠습니까?');
@@ -168,7 +201,7 @@ function decision(step){
   const childVisible=handoff.characters?.myeongseon==='travel'||handoff.witness==='명선';
   const image=step===0&&!childVisible?1:act.image;
   const line=step===0?(handoff.witness?'이 증인을 누가 데려왔느냐?':'이 기록을 가지고 온 사람이 너냐?'):act.line;
-  const buildup=step===0?buildIntro():extraBuildup(step)+(act.buildup??[]).map(cut=>frame(...cut)).join('')+branchCut(step);
+  const buildup=step===0?buildIntro()+journeyFrame(0):journeyFrame(step)+extraBuildup(step)+(act.buildup??[]).map(cut=>frame(...cut)).join('')+branchCut(step);
   reader.innerHTML=heading('시즌 3 · '+rankStories[handoff.rank][0],step===0?'문 안의 이름':act.title)+buildup+frame('s',image,'',act.speaker,line,'decision');
   const options=document.createElement('div');
   options.className='choices';
@@ -216,6 +249,11 @@ function finalOutcome(){
   if(a[7]===0&&nameKnown()&&evidence>=3)return 'record';
   return 'pending';
 }
+function journeyNote(j){
+  return [{early:'새벽 첫 줄로 들어섰다',late:'해가 높이 뜬 뒤에 들어섰다'}[j.arrival],
+    {intact:'원본은 마른 채 온전했다',partial:'원본 몇 장은 사본이었다',damp:'젖은 날짜 한 자리는 다른 증거로 메웠다'}[j.papers],
+    {quiet:'뒤따른 사람은 없었다',followed:'도성까지 뒤를 밟은 사람이 있었다',ahead:'이서가 온다는 말이 먼저 궁에 닿아 있었다'}[j.pursuit]].filter(Boolean).join(' · ');
+}
 function ending(){
   const outcome=finalOutcome();
   const [title,original,line]=verdicts[outcome];
@@ -231,7 +269,7 @@ function ending(){
   const closing={record:['S3-09','윤석이 마지막 붓을 거두었다. 비워 두었던 옆줄에 처음으로 난희의 이름이 들어갔다.'],voices:['S3-10','해가 오르는 마당에 그날 말한 사람들이 서 있었다. 누구도 남의 말을 대신하지 않았다.'],seal:['S3-11','등불 아래 두 봉투가 남았다. 하나는 오늘 끈이 풀렸고, 다른 하나는 약속한 날까지 묶여 있다.'],pending:['S3-12','판관이 남긴 빈 줄 앞에서 이서는 붓을 들지 않았다. 비워 둔 것도 기록이라고 여겼다.']}[outcome];
   const closingFrame=hasNewCut(closing[0])?frame(...newCut(closing[0]),closing[1]):'';
   reader.innerHTML=heading('시즌 3 완 · '+rankStories[handoff.rank][0],title)+frame(...newCut('S3-18','r',1),caption,'이서',line)+closingFrame+remedy+frame('s',8,'해가 뜨자 궁문 바깥까지 발소리가 들렸다. '+responsibility)+
-    '<section class="verdict"><h2>궁에 남은 기록</h2><dl><dt>이서의 신분</dt><dd>'+text(rankStories[handoff.rank][0])+'</dd><dt>기록의 결말</dt><dd>'+text(title)+'</dd></dl></section>';
+    '<section class="verdict"><h2>궁에 남은 기록</h2><dl><dt>이서의 신분</dt><dd>'+text(rankStories[handoff.rank][0])+'</dd><dt>기록의 결말</dt><dd>'+text(title)+'</dd>'+(handoff.journey?'<dt>궁에 들기까지</dt><dd>'+text(journeyNote(handoff.journey))+'</dd>':'')+'</dl></section>';
   reader.querySelector('.verdict').append(button('다른 선택으로 다시 읽기',()=>saveChange(()=>{
     progress={answers:[],reaction:false};
   })));

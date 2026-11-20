@@ -72,8 +72,10 @@ function escaped(value){
 }
 function art(kind,cut){
   const x=cut%4*100/3;
-  const y=Math.floor(cut/4)*((kind==='n'||kind==='r'||kind==='k'||kind==='g')?100/3:50);
-  return '<div class="art'+(kind==='e'?' detail':kind==='n'?' narrative':kind==='r'?' route-art':kind==='k'?' close-art':kind==='g'?' new-art':'')+'" data-art="'+kind+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></div>';
+  const rows=kind==='g'?(typeof NEW_CUT_ROWS_2==='number'?NEW_CUT_ROWS_2:4):0; // 새 컷 그림판은 4열, 줄 수는 빌드가 정한다
+  const y=kind==='g'?Math.floor(cut/4)*100/(rows-1):Math.floor(cut/4)*((kind==='n'||kind==='r'||kind==='k')?100/3:50);
+  const sizing=kind==='g'?';background-size:400% '+rows*100+'%':'';
+  return '<div class="art'+(kind==='e'?' detail':kind==='n'?' narrative':kind==='r'?' route-art':kind==='k'?' close-art':kind==='g'?' new-art':'')+'" data-art="'+kind+cut+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%'+sizing+'"></div>';
 }
 let sceneStep=0;
 // 새로 그린 컷(season-2-new.webp)이 있으면 그 칸을, 없으면 원래 그림을 쓴다.
@@ -178,8 +180,72 @@ function gateRecord(){
     seasonOneLead:inherited.lead,firstClue:inherited.first,
     ending:id,focus,accepted,witness,document,
     witnessAccount:answers[4]===1?'공개 범위를 확인한 진술':'직접 본 일만 기록하는 조건',
-    routeSelections:[...answers],characters:cast,discipline:cast.sanction,location:'궁문 바깥'
+    routeSelections:[...answers],characters:cast,discipline:cast.sanction,location:'궁문 바깥',
+    journey:journeyRecord(answers,cast)
   };
+}
+// ── 여정 상태 (season-2-story.js의 journeyBase·journeyDeltas). 화면에는 숫자 대신 장면과 대사로만 드러난다.
+function journeyAt(answers){
+  const j=[...journeyBase[inherited.rank]];
+  let wet=false;
+  answers.slice(0,6).forEach((option,step)=>{
+    if(step===4&&j[0]<=-2){j[1]-=1;wet=true;} // 노자가 바닥난 채 헛간에서 지낸 밤, 서류 한 귀퉁이가 젖는다
+    journeyDeltas[step][option].forEach((d,i)=>j[i]+=d);
+  });
+  const [purse,papers,trust,exposure]=j;
+  const body=purse>=1?'well':purse>=-2?'worn':'ill';
+  const pursuit=exposure>=4?'ahead':exposure>=2?'followed':'quiet';
+  return {purse,papers,trust,exposure,body,pursuit,wet,
+    papersState:wet?'damp':papers>=3?'intact':'partial',
+    arrival:body!=='ill'&&pursuit!=='ahead'?'early':'late'};
+}
+function journeyRecord(answers,cast){
+  const j=journeyAt(answers);
+  const withSomeone=cast.myeongseon==='travel'||cast.escort==='gate';
+  return {body:j.body,papers:j.papersState,pursuit:j.pursuit,arrival:j.arrival,
+    companion:withSomeone?(j.trust>=2?'steady':'weary'):'none'};
+}
+const journeyWords={
+  body:{well:'몸도 노자도 넉넉하게 닿았다',worn:'지친 몸으로 닿았다',ill:'열이 오른 채 닿았다'},
+  papers:{intact:'원본이 마른 채 온전하다',partial:'원본 몇 장은 사본으로만 남았다',damp:'젖은 날짜 한 자리가 번졌다'},
+  pursuit:{quiet:'뒤따른 사람이 없다',followed:'도성까지 뒤를 밟은 사람이 있다',ahead:'이서가 온다는 말이 먼저 궁에 닿았다'},
+  arrival:{early:'새벽, 첫 줄로 이름을 올렸다',late:'해가 높이 뜬 뒤에야 닿았다'},
+  companion:{steady:'함께 온 사람이 든든하다',weary:'함께 온 사람이 지쳤다',none:'혼자 왔다'}
+};
+function roadCompanion(step,cast){
+  if(step===1)return route.companion;
+  if(step===6){
+    if(cast.escort==='gate'||cast.escort==='departed')return route.companion;
+    return cast.myeongseon==='travel'?'명선':null;
+  }
+  if(cast.escort==='travel')return route.companion;
+  return step>=4&&cast.myeongseon==='travel'?'명선':null;
+}
+function roadPanel(step,cast){
+  const events=roadEvents[step];
+  if(!events)return '';
+  const j=journeyAt(progress.answers);
+  const who=roadCompanion(step,cast);
+  let key;
+  if(step===1||step===3)key=j.purse<0?'hard':'easy';
+  else if(step===2)key=j.exposure>=2?'hard':'easy';
+  else if(step===4)key=j.purse<=-2?'hard':'easy';
+  else if(step===5)key=j.exposure>=2?'watched':'quiet';
+  else if(step===6)key=!who?'solo':j.trust>=2?'warm':'weary';
+  else key=j.arrival;
+  let [slot,fallback,caption,lines]=events[key];
+  if(step===7&&key==='late'){
+    caption=(j.body==='ill'?'밤새 오른 열 때문에 이서는 해가 높이 뜬 뒤에야 궁문에 닿았다.':'숙소로 찾아온 사람들에게 길을 붙들려, 이서는 해가 높이 뜬 뒤에야 궁문에 닿았다.')+
+      ' 문 앞 상에는 이미 다른 이름이 몇 줄 적혀 있었다.'+(j.pursuit==='ahead'?' 그중 한 줄에는 여천에서 이서라는 사람이 온다는 말이 먼저 올라 있었다.':'');
+    lines=[['이서',j.body==='ill'?'목소리가 잘 안 나와요. 짧게 말해도 빠짐없이 적어 주세요.':j.pursuit==='ahead'?'제 이름보다 제 얘기가 먼저 와 있군요. 누가 썼는지부터 보겠습니다.':'늦었지만 순서를 건너뛰어 달라고는 하지 않겠습니다.']];
+  }
+  const spoken=lines.map(([speaker,line])=>{
+    if(speaker!=='동행')return [speaker,line];
+    if(!who)return null;
+    if(who==='명선'){const v=childVoice[step];return ['명선',Array.isArray(v)?v[key==='warm'?0:1]:v||line];}
+    return [who,line];
+  }).filter(Boolean);
+  return panel(...withNew(slot,[fallback[0],fallback[1]]),caption,spoken);
 }
 function clueNotebook(){
   if(!progress.answers.length)return '';
@@ -193,6 +259,12 @@ function clueNotebook(){
   const sanction=disciplinaryAction(progress.answers);
   if(sanction)facts.push(['관아의 처분',sanction.person+' · '+sanction.sanction]);
   if(progress.answers.length>=6)facts.push(turns.clue);
+  if(progress.answers.length>=2){
+    const j=journeyAt(progress.answers);
+    facts.push(['길의 사정',[{well:'노자와 몸은 아직 넉넉하다',worn:'노자가 줄고 몸이 지쳐 간다',ill:'노자가 바닥나고 열이 오르기 시작했다'}[j.body],
+      {intact:'원본은 마른 채 잘 챙겼다',partial:'원본 몇 장은 사본뿐이다',damp:'젖어 번진 날짜 한 자리가 있다'}[j.papersState],
+      {quiet:'뒤따르는 사람은 없다',followed:'뒤를 밟는 사람이 있다',ahead:'이서가 온다는 말이 앞서 퍼졌다'}[j.pursuit]].join(' · ')]);
+  }
   return '<details><summary>이서가 확인한 단서</summary><dl class="clue-list">'+facts.map(([label,fact])=>'<dt>'+escaped(label)+'</dt><dd>'+escaped(fact)+'</dd>').join('')+'</dl></details>';
 }
 function handoff(){
@@ -324,7 +396,7 @@ function travelScene(step){
   const note=step===1?panel('e',route.art===0?7:route.art===1?8:route.art===2?9:4,'‘'+route.item+'’의 출처를 확인해 줄 사람이나 기록이 필요했다.'):step===7?
     panel('e',5,'이서가 먼저 맡기기로 한 것은 '+gateFocus[progress.answers[6]][0]+'이다.',[['문지기',gateFocus[progress.answers[6]][1]]]):'';
   const rankScene=step===1?panel(...departureScenes[inherited.rank]):'';
-  reader.innerHTML='<div class="chapter">시즌 2 · '+(step+1)+' / 8 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(scene.title)+'</h2>'+body+rankScene+narrativePanels(step)+followup+characterPanels(step,cast)+note+
+  reader.innerHTML='<div class="chapter">시즌 2 · '+(step+1)+' / 8 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(scene.title)+'</h2>'+roadPanel(step,cast)+body+rankScene+narrativePanels(step)+followup+characterPanels(step,cast)+note+
     '<h3 class="question">'+escaped(scene.question)+'</h3>';
   options(availableChoices(step,cast),choose);
 }
@@ -359,6 +431,7 @@ function previousAction(){
   if(step===6&&option===1&&progress.answers[3]!==1&&!(progress.answers[1]===1&&progress.answers[5]===1)){
     specific='이서를 따라 문 앞까지 갈 증인은 아직 정해지지 않았다. 이서는 맡겨 둔 진술을 자기 말처럼 읽지 않고, 출석할 사람을 기다리겠다고 적었다.';
   }
+  if(step<=5)specific+=' '+journeyCosts[step][option];
   const relay=step===4&&option===1&&cast.myeongseon!=='travel'
     ? ['명선의 쪽지','제가 본 데까지만 적어 주세요. 어디서 지내는지는 말하지 않아도 돼요.']
     : null;
@@ -379,6 +452,15 @@ function gateMoment(id,record){
   if(id===2&&record.witness!=='명선')return panel('e',11,'문지기 상 위에 두 사람의 이름이 한 줄로 나란히 적혔다. 누구도 상대의 말을 대신 꺼내지 않았다.');
   if(id===3&&!record.witness)return panel(...withNew('S2-10',gateMoments[id]));
   return panel(...gateMoments[id]);
+}
+// 궁문 앞에서 길의 사정이 드러나는 칸: 무엇을 들고 어떤 몸으로 왔는지가 문지기와 이서의 말에 남는다.
+function journeyPanel(record){
+  const j=record.journey;
+  const papersLine={intact:'원본은 마른 채 그대로입니다. 접힌 자리까지 보여 드릴 수 있어요.',partial:'원본 몇 장은 사본뿐입니다. 누가 언제 베꼈는지 옆에 적어 왔어요.',damp:'날짜 한 자리가 젖어 번졌습니다. 어떻게 젖었는지 옆에 적어 두었어요.'}[j.papers];
+  const keeper={intact:'마른 원본이면 안에서도 바로 대조할 수 있겠소.',partial:'사본은 베낀 사람을 확인한 뒤에야 올리겠소.',damp:'번진 자리는 다른 증거로 채워야 할 거요. 안에 그대로 전하겠소.'}[j.papers];
+  const caption=(j.pursuit==='ahead'?'문지기는 이서의 이름을 듣기도 전에 상 위의 쪽지를 한 번 내려다보았다. ':j.pursuit==='followed'?'담 모퉁이에 성문 앞에서 본 사내가 서 있었다. ':'')+
+    (j.companion==='weary'?'함께 온 사람은 돌턱에 앉아 숨을 골랐다. ':'')+'문지기가 이서가 품에서 꺼낸 봉투의 귀퉁이를 살폈다.';
+  return panel('e',9,caption,[['이서',papersLine],['문지기',keeper]]);
 }
 function finale(){
   sceneStep=8;
@@ -406,8 +488,9 @@ function finale(){
   const transferred=write('yeocheon-season-three-v1handoff:'+inherited.key,record);
   reader.innerHTML='<div class="chapter">시즌 2 엔딩 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(title)+'</h2>'+
     panel(kind,cut,arrival,[['이서',lead],arrivalEndings[id][4]])+
-    gateMoment(id,record)+seoEnding+punishment+panel('n',13,doorCaption,[['문 너머의 목소리',doorLine]])+
+    gateMoment(id,record)+journeyPanel(record)+seoEnding+punishment+panel('n',13,doorCaption,[['문 너머의 목소리',doorLine]])+
     '<section class="gate-record" aria-label="시즌 2 종료 기록"><p class="chapter">시즌 2 완 · 궁문 바깥</p><h2>궁문 앞에 남긴 기록</h2><dl><dt>이서의 신분</dt><dd>'+escaped(route.rank)+'</dd><dt>문 앞의 상황</dt><dd>'+escaped(material)+'</dd><dt>궁문 밖에 온 사람</dt><dd>'+escaped(record.characters.gatePeople.slice(2).join(' · ')||'이서 홀로 도착')+'</dd>'+
+    '<dt>길의 사정</dt><dd>'+escaped(['arrival','body','papers','companion','pursuit'].map(k=>journeyWords[k][record.journey[k]]).join(' · '))+'</dd>'+
     (record.discipline?'<dt>관아의 처분</dt><dd>'+escaped(record.discipline.person+' · '+record.discipline.sanction)+'</dd>':'')+'</dl>'+
     '<p>시즌 3는 이 문이 열리는 순간부터 시작됩니다.</p>'+(transferred?'<p><a class="link primary" href="season-3.html">시즌 3 이어 읽기</a></p>':'<p class="intro">이 브라우저에 다음 시즌 기록을 저장하지 못했습니다.</p>')+'</section>';
 }
