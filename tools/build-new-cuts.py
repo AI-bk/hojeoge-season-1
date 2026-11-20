@@ -9,7 +9,7 @@ from PIL import Image, ImageOps
 
 SLOTS2 = {'S2-01':0,'S2-02':1,'S2-03':2,'S2-04':3,'S2-05':4,'S2-06a':5,'S2-06b':6,'S2-06c':7,
          'S2-06d':8,'S2-07':9,'S2-08':10,'S2-09':11,'S2-10':12,'S2-11':13,'S2-12':14}
-SLOTS1 = {'S1-%02d' % i: i-1 for i in range(1, 16)}
+SLOTS1 = {'S1-%02d' % i: i-1 for i in range(1, 17)}
 SLOTS3 = {'S3-%02d' % i: i-1 for i in range(1, 45)}
 CELL = 400
 src = sys.argv[1]
