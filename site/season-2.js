@@ -159,6 +159,39 @@ function endingDetail(answers){
   return {id:focus*2+(ok?0:1),effect};
 }
 function endingIndex(answers){return endingDetail(answers).id;}
+// 궁문 앞 실패가 겹치면 시즌 3로 가지 못하는 결말이 된다. 신분이 높을수록 여러 불운이 겹쳐야만 이르게 된다.
+function fatalEnding(answers){
+  if(answers.length!==8)return null;
+  const d=endingDetail(answers);
+  if(d.id%2===0)return null;
+  const rank=inherited.rank;
+  const focus=answers[6],approach=answers[7];
+  const j=journeyAt(answers);
+  const alone=castAt(answers).gatePeople.length===2;
+  // 양민·중인은 지켜 줄 이름이 없어 한두 가지 불운에도 무너지고, 양반·왕족은 여러 불운이 겹쳐야 무너진다.
+  const low=rank<=3;
+  if(alone&&j.pursuit==='ahead'&&j.arrival==='late'&&(low||j.body==='ill'))return 'assassinated';
+  if(rank===5&&alone&&focus===0&&approach===0&&d.effect==='forewarned'&&j.papersState!=='intact')return 'executed';
+  if(low&&focus===0&&approach===0&&j.papersState==='damp'&&j.pursuit!=='quiet')return 'enslaved';
+  if(approach===0&&focus!==2&&j.arrival==='late'&&(low?j.pursuit!=='quiet':j.pursuit==='ahead'&&alone&&j.body!=='well'))return 'imprisoned';
+  if(!low&&alone&&focus===2&&j.pursuit==='ahead'&&j.arrival==='late'&&(rank===4?j.body!=='well':approach===0))return 'exiled';
+  return null;
+}
+function fatalFinale(fate){
+  const [title,place,beats]=fatalEndings[fate];
+  // 시즌 3가 이 기록을 이어받지 않도록 문 밖이 아닌 곳으로 남긴다.
+  write('yeocheon-season-three-v1handoff:'+inherited.key,{version:1,rank:inherited.rank,location:place,fate,routeSelections:[...progress.answers]});
+  reader.innerHTML='<div class="chapter">시즌 2 엔딩 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(title)+'</h2>'+
+    beats.map(([slot,[kind,cut],caption,lines])=>panel(...withNew(slot||'',[kind,cut]),caption,lines)).join('')+
+    '<section class="gate-record fatal" aria-label="시즌 2 종료 기록"><p class="chapter">시즌 2 완 · 궁에 닿지 못함</p><h2>이서에게 남은 기록</h2><dl><dt>이서의 신분</dt><dd>'+escaped(route.rank)+'</dd><dt>이서가 있는 곳</dt><dd>'+escaped(place)+'</dd></dl>'+
+    '<p>이 길에서는 궁문이 열리지 않았습니다. 다른 선택으로 한양 가는 길을 다시 걸을 수 있습니다.</p></section>';
+  const again=document.createElement('div');
+  again.className='choices';
+  for(const [label,act] of [['궁문 앞 선택부터 다시 하기',()=>{progress.answers=progress.answers.slice(0,6);progress.reaction=true;}],['시즌 2 처음부터 다시 걷기',()=>{progress=fresh();}]]){
+    const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>commit(act);again.append(b);
+  }
+  reader.append(again);
+}
 // 여정 때문에 결말이 바뀌었을 때 그 까닭을 보여 주는 칸.
 const journeyTurns={
   damp:['e',9,'문지기는 번진 날짜 자리를 한참 들여다보더니 봉투를 도로 내밀었다. 젖은 원본은 안에서 다시 확인할 사람이 정해진 뒤에 받겠다고 했다.',[['문지기','이 자리가 언제 번졌는지 내가 보증할 수는 없소. 젖은 경위를 확인해 줄 사람과 함께 다시 오시오.']]],
@@ -496,6 +529,8 @@ function journeyPanel(record){
 }
 function finale(){
   sceneStep=8;
+  const fate=fatalEnding(progress.answers);
+  if(fate)return fatalFinale(fate);
   const record=gateRecord();
   const id=record.ending;
   const [title,,caption,line]=arrivalEndings[id];

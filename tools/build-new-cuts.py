@@ -9,7 +9,7 @@ from PIL import Image, ImageOps
 
 SLOTS2 = {'S2-01':0,'S2-02':1,'S2-03':2,'S2-04':3,'S2-05':4,'S2-06a':5,'S2-06b':6,'S2-06c':7,
          'S2-06d':8,'S2-07':9,'S2-08':10,'S2-09':11,'S2-10':12,'S2-11':13,'S2-12':14}
-SLOTS2.update({'S2-%02d' % i: i+2 for i in range(13, 27)})  # 여정 길 위 장면(S2-13~26)
+SLOTS2.update({'S2-%02d' % i: i+2 for i in range(13, 37)})  # 여정 길 위 장면(S2-13~26), 실패 결말(S2-27~36)
 SLOTS1 = {'S1-%02d' % i: i-1 for i in range(1, 17)}
 SLOTS3 = {'S3-%02d' % i: i-1 for i in range(1, 45)}
 CELL = 400

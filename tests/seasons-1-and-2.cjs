@@ -78,12 +78,14 @@ assert.match(open([s1]).html(),/중반 · 첫 신분[\s\S]*마지막 배/);
 storage.set(s1key,JSON.stringify({...legacy,page:14,rank:4,rankLead:1,rankLeadRead:false}));
 assert.match(open([s1]).html(),/판결 뒤[\s\S]*판결이 끝난 뒤/);
 // 여정 상태가 결말을 바꾸므로, 신분마다 여섯 결말에 닿는 경로를 직접 찾는다.
-const pathsByRank={};
+const pathsByRank={},fatalSeen=[];
 for(const rank of [2,3,4,5]){
  for(const key of storage.keys())if(key.startsWith('yeocheon-season-two'))storage.delete(key);
  storage.set(s1key,JSON.stringify({...legacy,page:15,rank,ending:0,rankLead:1,departureRank:rank}));
  const probe=open(s2);
- const found=probe.value('(()=>{const f=[];for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}const e=endingIndex(a);if(!f[e])f[e]=a;}return f})()');
+ const found=probe.value('(()=>{const f=[];for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}const e=endingIndex(a);if(!fatalEnding(a)&&!f[e])f[e]=a;}return f})()');
+ const fates=probe.value('(()=>{const f={};for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}const k=fatalEnding(a);if(k)f[k]=(f[k]||0)+1;}return f})()');
+ fatalSeen.push([rank,fates]);
  assert.equal(found.filter(Boolean).length,6,'rank '+rank+' reaches all six gate endings');
  pathsByRank[rank]=found;
 }
@@ -104,6 +106,9 @@ for(const rank of [2,3,4,5])for(let ending=0;ending<6;ending++){
  assert.equal(two.value('endingIndex(progress.answers)'),ending);
  assert.match(two.html(),/시즌 2 엔딩/);
 }
+{const all=new Set(fatalSeen.flatMap(([,f])=>Object.keys(f)));for(const k of ['assassinated','executed','enslaved','imprisoned','exiled'])assert.ok(all.has(k),'fatal ending '+k+' reachable');
+ const rate=Object.fromEntries(fatalSeen.map(([r,f])=>[r,Object.values(f).reduce((a,b)=>a+b,0)]));assert.ok(rate[2]>rate[4]&&rate[3]>rate[4],'higher ranks fail fatally less often');
+ for(const [rank,f] of fatalSeen){if(rank>=4){assert.ok(!f.enslaved,'no enslavement for rank '+rank);}if(rank!==5)assert.ok(!f.executed);}}
 console.log('PASS: joined reading pages across both seasons, all 12 + 6 endings, exact route captions, previous save compatibility and reload');
 
 const observed=new Map();
@@ -199,6 +204,7 @@ for(const rank of [2,3,4,5]){
       const answers=[...journey,endingChoice];
       storage.set(current,JSON.stringify({answers,reaction:false}));
       const ending=open(s2);
+      if(ending.value('fatalEnding(progress.answers)')){assert.match(ending.html(),/궁에 닿지 못함/);assert.doesNotMatch(ending.html(),/season-3.html/);continue;}
       const record=ending.value('gateRecord()');
       const atGate=record.characters.gatePeople;
       assert.equal(atGate.includes('명선'),child===1);
@@ -236,6 +242,7 @@ for(const rank of [2,3,4,5]){
     assert.equal(result.discipline?.person??null,person);
     assert.equal(result.characters.gatePeople.includes('서겸'),onGate);
     assert.equal(result.location,'궁문 바깥');
+    if(p.value('fatalEnding(progress.answers)')){assert.match(p.html(),/궁에 닿지 못함/);continue;} // 여정이 무너진 신분은 궁문 기록 대신 실패 결말
     assert.match(p.html(),/data-art="n13"[\s\S]*궁문 밖에 온 사람/);
     assert.deepEqual(JSON.parse(storage.get('yeocheon-season-three-v1handoff:'+p.value('inherited.key'))).discipline,result.discipline);
     assert.deepEqual(open(s2).value('gateRecord()'),result);
