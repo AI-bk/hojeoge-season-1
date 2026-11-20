@@ -77,8 +77,18 @@ storage.set(s1key,JSON.stringify({...legacy,page:5,rank:4}));
 assert.match(open([s1]).html(),/중반 · 첫 신분[\s\S]*마지막 배/);
 storage.set(s1key,JSON.stringify({...legacy,page:14,rank:4,rankLead:1,rankLeadRead:false}));
 assert.match(open([s1]).html(),/판결 뒤[\s\S]*판결이 끝난 뒤/);
-const paths=[[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,0],[0,0,0,2,0,0,1,0],[2,2,2,2,2,2,2,2],[0,0,0,0,0,0,2,0]];
-for(const rank of [2,3,4,5])for(let ending=0;ending<paths.length;ending++){
+// 여정 상태가 결말을 바꾸므로, 신분마다 여섯 결말에 닿는 경로를 직접 찾는다.
+const pathsByRank={};
+for(const rank of [2,3,4,5]){
+ for(const key of storage.keys())if(key.startsWith('yeocheon-season-two'))storage.delete(key);
+ storage.set(s1key,JSON.stringify({...legacy,page:15,rank,ending:0,rankLead:1,departureRank:rank}));
+ const probe=open(s2);
+ const found=probe.value('(()=>{const f=[];for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}const e=endingIndex(a);if(!f[e])f[e]=a;}return f})()');
+ assert.equal(found.filter(Boolean).length,6,'rank '+rank+' reaches all six gate endings');
+ pathsByRank[rank]=found;
+}
+for(const rank of [2,3,4,5])for(let ending=0;ending<6;ending++){
+ const paths=pathsByRank[rank];
  for(const key of storage.keys())if(key.startsWith('yeocheon-season-two'))storage.delete(key);
  storage.set(s1key,JSON.stringify({...legacy,page:15,rank,ending:0,rankLead:1,departureRank:rank}));
  let two=open(s2);
@@ -152,7 +162,7 @@ for(const rank of [2,3,4,5]){
     specific.add(outcome);
     assert.ok(selecting.els['#reader'].children.some(child=>child.html?.includes('이서가 확인한 단서')));
   }
-  for(const [end,answers] of paths.entries()){
+  for(const [end,answers] of pathsByRank[rank].entries()){
     storage.set(current,JSON.stringify({answers,reaction:false}));
     const done=open(s2);
     const record=done.value('gateRecord()');

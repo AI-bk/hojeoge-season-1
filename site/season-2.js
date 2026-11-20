@@ -131,14 +131,45 @@ function choose(index){
   syncScore();
 }
 
-function endingIndex(answers){
+// 궁문 앞 결말: 준비한 방식(기존 규칙)에 여정이 남긴 유리함·불리함을 더한다.
+function endingDetail(answers){
   const focus=answers[6];
   const approach=answers[7];
   const prepared=answers[5]===focus||answers[1]===focus||answers[2]===focus||(focus===0&&answers[0]===0);
   const effective=focus===1?(answers[3]===1||answers[1]===1&&answers[5]===1):prepared;
   const registered=answers[5]===focus&&(focus!==1||effective);
-  return focus*2+((approach===0&&effective)||(approach===2&&registered)?0:1);
+  let ok=(approach===0&&effective)||(approach===2&&registered);
+  let effect=null;
+  const j=journeyAt(answers);
+  if(focus===0){
+    if(ok&&j.papersState==='damp'){ok=false;effect='damp';}
+    else if(ok&&j.pursuit==='ahead'){ok=false;effect='forewarned';}
+    else if(!ok&&j.papersState==='intact'&&j.arrival==='early'&&j.pursuit==='quiet'){ok=true;effect='dry-dawn';}
+  }else if(focus===1){
+    const cast=castAt(answers);
+    const witness=cast.myeongseon==='travel'||cast.escort==='gate';
+    const companion=journeyRecord(answers,cast).companion;
+    if(ok&&j.body==='ill'){ok=false;effect='ill';}
+    else if(ok&&companion==='weary'){ok=false;effect='weary';}
+    else if(!ok&&witness&&companion==='steady'&&j.arrival==='early'){ok=true;effect='steady-dawn';}
+  }else{
+    if(ok&&j.arrival==='late'&&j.pursuit!=='quiet'){ok=false;effect='intercepted';}
+    else if(!ok&&j.arrival==='early'&&j.pursuit==='quiet'){ok=true;effect='quiet-dawn';}
+  }
+  return {id:focus*2+(ok?0:1),effect};
 }
+function endingIndex(answers){return endingDetail(answers).id;}
+// 여정 때문에 결말이 바뀌었을 때 그 까닭을 보여 주는 칸.
+const journeyTurns={
+  damp:['e',9,'문지기는 번진 날짜 자리를 한참 들여다보더니 봉투를 도로 내밀었다. 젖은 원본은 안에서 다시 확인할 사람이 정해진 뒤에 받겠다고 했다.',[['문지기','이 자리가 언제 번졌는지 내가 보증할 수는 없소. 젖은 경위를 확인해 줄 사람과 함께 다시 오시오.']]],
+  forewarned:['n',13,'문지기 상에는 여천에서 온 봉투를 받지 말고 먼저 알리라는 쪽지가 이미 놓여 있었다. 이서가 오기 전에 누군가 다녀간 것이다.',[['이서','제 봉투보다 저를 막으라는 쪽지가 먼저 왔군요. 그 쪽지를 쓴 사람 이름도 같이 적어 주세요.']]],
+  'dry-dawn':['e',9,'새벽 첫 줄이었다. 접힌 자리까지 마른 원본을 본 문지기는 출처 확인을 미루지 않고 그 자리에서 봉투에 표를 붙였다.',[['문지기','이만큼 온전하면 안에서도 바로 대조할 수 있겠소. 첫 줄에 올리겠소.']]],
+  ill:['n',13,'이서는 열 때문에 말을 잇지 못했다. 문지기는 함께 온 사람의 이름만 적고, 증언은 이서가 다시 말할 수 있을 때 함께 듣겠다며 미뤘다.',[['문지기','데려온 사람이 말하는 자리에 데려온 사람이 서 있지 못하면 안 되오. 몸부터 추스르시오.']]],
+  weary:['n',13,'먼 길에 지친 동행인은 문 앞에 오래 서 있지 못하고 돌턱에 주저앉았다. 문지기는 증언을 다음 부름으로 미뤘다.',[['문지기','오늘은 이름만 받겠소. 그 사람이 똑바로 서서 말할 수 있을 때 다시 부르겠소.']]],
+  'steady-dawn':['n',13,'새벽 첫 줄이라 기다리는 사람이 없었다. 문지기는 함께 온 사람이 직접 말하겠다는 것을 확인하고 그 자리에서 이름을 나란히 적었다.',[['문지기','먼저 온 사람이니 먼저 듣겠소. 각자 본 것만 말하시오.']]],
+  intercepted:['n',13,'약속한 시각은 이미 지나 있었다. 인계인을 찾는 사람이 이서보다 먼저 다녀갔다는 말만 남아 있었다.',[['이서','저보다 먼저 와서 인계인을 찾은 사람이 누군지, 그 이름부터 적어 주세요.']]],
+  'quiet-dawn':['n',13,'아무도 이서가 온 줄 모르는 새벽이었다. 인계인은 약속보다 일찍 문 안쪽에 나와 있었다.',[['인계인','이 시각이면 아무도 우리를 보지 못했을 거요. 표를 맞춰 봅시다.']]]
+};
 function disciplinaryAction(answers){
   const checkedIn=answers[2]===0;
   const clerkSigned=answers[5]===0;
@@ -181,7 +212,7 @@ function gateRecord(){
     ending:id,focus,accepted,witness,document,
     witnessAccount:answers[4]===1?'공개 범위를 확인한 진술':'직접 본 일만 기록하는 조건',
     routeSelections:[...answers],characters:cast,discipline:cast.sanction,location:'궁문 바깥',
-    journey:journeyRecord(answers,cast)
+    journey:{...journeyRecord(answers,cast),effect:endingDetail(answers).effect}
   };
 }
 // ── 여정 상태 (season-2-story.js의 journeyBase·journeyDeltas). 화면에는 숫자 대신 장면과 대사로만 드러난다.
@@ -456,6 +487,7 @@ function gateMoment(id,record){
 // 궁문 앞에서 길의 사정이 드러나는 칸: 무엇을 들고 어떤 몸으로 왔는지가 문지기와 이서의 말에 남는다.
 function journeyPanel(record){
   const j=record.journey;
+  if(['damp','forewarned','dry-dawn'].includes(j.effect))return ''; // 결말 첫 칸이 이미 서류 이야기를 했다
   const papersLine={intact:'원본은 마른 채 그대로입니다. 접힌 자리까지 보여 드릴 수 있어요.',partial:'원본 몇 장은 사본뿐입니다. 누가 언제 베꼈는지 옆에 적어 왔어요.',damp:'날짜 한 자리가 젖어 번졌습니다. 어떻게 젖었는지 옆에 적어 두었어요.'}[j.papers];
   const keeper={intact:'마른 원본이면 안에서도 바로 대조할 수 있겠소.',partial:'사본은 베낀 사람을 확인한 뒤에야 올리겠소.',damp:'번진 자리는 다른 증거로 채워야 할 거요. 안에 그대로 전하겠소.'}[j.papers];
   const caption=(j.pursuit==='ahead'?'문지기는 이서의 이름을 듣기도 전에 상 위의 쪽지를 한 번 내려다보았다. ':j.pursuit==='followed'?'담 모퉁이에 성문 앞에서 본 사내가 서 있었다. ':'')+
@@ -487,6 +519,7 @@ function finale(){
       : record.accepted?'인계할 사람이 도착함':'인계할 사람을 기다림';
   const transferred=write('yeocheon-season-three-v1handoff:'+inherited.key,record);
   reader.innerHTML='<div class="chapter">시즌 2 엔딩 · '+route.rank+'</div><h2 tabindex="-1">'+escaped(title)+'</h2>'+
+    (record.journey.effect?panel(...journeyTurns[record.journey.effect]):'')+
     panel(kind,cut,arrival,[['이서',lead],arrivalEndings[id][4]])+
     gateMoment(id,record)+journeyPanel(record)+seoEnding+punishment+panel('n',13,doorCaption,[['문 너머의 목소리',doorLine]])+
     '<section class="gate-record" aria-label="시즌 2 종료 기록"><p class="chapter">시즌 2 완 · 궁문 바깥</p><h2>궁문 앞에 남긴 기록</h2><dl><dt>이서의 신분</dt><dd>'+escaped(route.rank)+'</dd><dt>문 앞의 상황</dt><dd>'+escaped(material)+'</dd><dt>궁문 밖에 온 사람</dt><dd>'+escaped(record.characters.gatePeople.slice(2).join(' · ')||'이서 홀로 도착')+'</dd>'+
