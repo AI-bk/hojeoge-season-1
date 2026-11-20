@@ -187,10 +187,30 @@ function fatalEnding(answers){
   // 양민·중인은 지켜 줄 이름이 없어 한두 가지 불운에도 무너지고, 양반·왕족은 여러 불운이 겹쳐야 무너진다.
   const low=rank<=3;
   if(alone&&j.pursuit==='ahead'&&j.arrival==='late'&&(low||j.body==='ill'))return 'assassinated';
-  if(rank===5&&alone&&focus===0&&approach===0&&d.effect==='forewarned'&&j.papersState!=='intact')return 'executed';
+  if(rank===5&&alone&&focus===0&&approach===0&&d.effect==='forewarned')return 'executed';
   if(low&&focus===0&&approach===0&&j.papersState==='damp'&&j.pursuit!=='quiet')return 'enslaved';
   if(approach===0&&focus!==2&&j.arrival==='late'&&(low?j.pursuit!=='quiet':j.pursuit==='ahead'&&alone&&j.body!=='well'))return 'imprisoned';
   if(!low&&alone&&focus===2&&j.pursuit==='ahead'&&j.arrival==='late'&&(rank===4?j.body!=='well':approach===0))return 'exiled';
+  return null;
+}
+// 길 위에서 끝나는 실패: 방금 고른 선택이 그때까지의 여정과 겹치면 궁문에 닿기 전에 무너진다.
+function midFatal(answers){
+  const k=answers.length-1;
+  if(k<2||k>5)return null;
+  const j=journeyAt(answers),rank=inherited.rank,low=rank<=3,a=answers;
+  const cast=castAt(answers);
+  const alone=cast.escort!=='travel'&&cast.myeongseon!=='travel';
+  if(k===2&&a[2]===2&&j.exposure>=({2:1,3:2}[rank]??4))return 'checkpoint';      // 이미 노출된 채 남의 표에 기대 검문소를 지나려 했다
+  if(k===3&&a[3]===1&&j.purse<=({2:-4,3:-3}[rank]??-3))return 'collapsed';         // 바닥난 노자로 명선의 몫까지 떠안았다
+  if(k===4&&a[4]===0&&alone&&j.exposure>=(low?2:3))return 'ambushed';  // 혼자인데 조건을 거절해 적을 만들었다
+  if(k===4&&rank===4&&a[4]===2&&j.exposure>=3&&cast.escort!=='travel')return 'recalled';   // 문중에 서면 답을 청하자 문중이 먼저 움직였다
+  if(k===4&&rank===5&&a[4]===0&&j.exposure>=3)return 'confined';   // 별채의 요구를 거절한 왕족을 별채가 손님으로 데려갔다
+  if(k===5&&j.pursuit==='ahead'&&(low?a[5]!==1:a[5]===2&&alone))return 'seized';             // 소문이 앞선 도성에서 사람 대신 종이에 기댔다
+  return null;
+}
+// 저장된 기록이라도 길 위에서 이미 무너진 지점이 있으면 그곳에서 멈춘다.
+function roadFall(answers){
+  for(let n=3;n<=Math.min(answers.length,6);n++){const fate=midFatal(answers.slice(0,n));if(fate)return {fate,at:n};}
   return null;
 }
 function fatalFinale(fate){
@@ -203,7 +223,8 @@ function fatalFinale(fate){
     '<p>이 길에서는 궁문이 열리지 않았습니다. 다른 선택으로 한양 가는 길을 다시 걸을 수 있습니다.</p></section>';
   const again=document.createElement('div');
   again.className='choices';
-  for(const [label,act] of [['궁문 앞 선택부터 다시 하기',()=>{progress.answers=progress.answers.slice(0,6);progress.reaction=true;}],['시즌 2 처음부터 다시 걷기',()=>{progress=fresh();}]]){
+  const retry=progress.answers.length===8?['궁문 앞 선택부터 다시 하기',()=>{progress.answers=progress.answers.slice(0,6);progress.reaction=true;}]:['방금 고른 선택 다시 하기',()=>{progress.answers=progress.answers.slice(0,-1);progress.reaction=progress.answers.length>0;}];
+  for(const [label,act] of [retry,['시즌 2 처음부터 다시 걷기',()=>{progress=fresh();}]]){
     const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>commit(act);again.append(b);
   }
   reader.append(again);
@@ -590,7 +611,8 @@ function refreshControls(message){
 function render(focus=false,message=''){
   if(!inherited){
     reader.innerHTML='<div class="chapter">시즌 2</div><h1 tabindex="-1">궁문까지</h1><p class="intro">이 브라우저에 한양행으로 이어지는 시즌 1 결말이 없습니다. 시즌 1을 마치면 이어 읽을 수 있습니다.</p><p><a class="link primary" href="season-1.html">시즌 1로 돌아가기</a></p>';
-  }else if(progress.answers.length===8)finale();
+  }else if(roadFall(progress.answers)){const fall=roadFall(progress.answers);progress.answers=progress.answers.slice(0,fall.at);sceneStep=fall.at;fatalFinale(fall.fate);reader.insertAdjacentHTML('afterbegin',previousAction());}
+  else if(progress.answers.length===8)finale();
   else if(!progress.answers.length)opening();
   else{
     travelScene(progress.answers.length);

@@ -78,12 +78,14 @@ assert.match(open([s1]).html(),/중반 · 첫 신분[\s\S]*마지막 배/);
 storage.set(s1key,JSON.stringify({...legacy,page:14,rank:4,rankLead:1,rankLeadRead:false}));
 assert.match(open([s1]).html(),/판결 뒤[\s\S]*판결이 끝난 뒤/);
 // 여정 상태가 결말을 바꾸므로, 신분마다 여섯 결말에 닿는 경로를 직접 찾는다.
-const pathsByRank={},fatalSeen=[];
+const pathsByRank={},fatalSeen=[],midSeen=[];
 for(const rank of [2,3,4,5]){
  for(const key of storage.keys())if(key.startsWith('yeocheon-season-two'))storage.delete(key);
  storage.set(s1key,JSON.stringify({...legacy,page:15,rank,ending:0,rankLead:1,departureRank:rank}));
  const probe=open(s2);
- const found=probe.value('(()=>{const f=[];for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}const e=endingIndex(a);if(!fatalEnding(a)&&!f[e])f[e]=a;}return f})()');
+ const found=probe.value('(()=>{const f=[];for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}const e=endingIndex(a);if(!fatalEnding(a)&&![3,4,5,6].some(k=>midFatal(a.slice(0,k)))&&!f[e])f[e]=a;}return f})()');
+ const mids=probe.value('(()=>{const f={};for(let n=0;n<729;n++){const a=[];let x=n;for(let i=0;i<6;i++){a.push(x%3);x=Math.floor(x/3);}for(let k=3;k<=6;k++){const m=midFatal(a.slice(0,k));if(m){f[m]=1;break;}}}return Object.keys(f)})()');
+ midSeen.push(...mids);
  const fates=probe.value('(()=>{const f={};for(let n=0;n<6561;n++){const a=[];let x=n;for(let i=0;i<8;i++){a.push(x%3);x=Math.floor(x/3);}const k=fatalEnding(a);if(k)f[k]=(f[k]||0)+1;}return f})()');
  fatalSeen.push([rank,fates]);
  assert.equal(found.filter(Boolean).length,6,'rank '+rank+' reaches all six gate endings');
@@ -107,6 +109,7 @@ for(const rank of [2,3,4,5])for(let ending=0;ending<6;ending++){
  assert.match(two.html(),/시즌 2 엔딩/);
 }
 {const all=new Set(fatalSeen.flatMap(([,f])=>Object.keys(f)));for(const k of ['assassinated','executed','enslaved','imprisoned','exiled'])assert.ok(all.has(k),'fatal ending '+k+' reachable');
+ for(const k of ['checkpoint','collapsed','ambushed','seized','recalled','confined'])assert.ok(midSeen.includes(k),'road ending '+k+' reachable');
  const rate=Object.fromEntries(fatalSeen.map(([r,f])=>[r,Object.values(f).reduce((a,b)=>a+b,0)]));assert.ok(rate[2]>rate[4]&&rate[3]>rate[4],'higher ranks fail fatally less often');
  for(const [rank,f] of fatalSeen){if(rank>=4){assert.ok(!f.enslaved,'no enslavement for rank '+rank);}if(rank!==5)assert.ok(!f.executed);}}
 console.log('PASS: joined reading pages across both seasons, all 12 + 6 endings, exact route captions, previous save compatibility and reload');
@@ -163,9 +166,11 @@ for(const rank of [2,3,4,5]){
     selecting.pick(option);
     const outcome=selecting.value('turns.outcomes['+step+']['+option+']');
     const changed=option===1&&[2,4,5].includes(step);
-    if(!changed)assert.ok(selecting.html().includes(outcome),rank+':'+step+':'+option);
+    const fell=selecting.value('midFatal(progress.answers)');
+    if(fell)assert.match(selecting.html(),/궁에 닿지 못함[\s\S]*방금 고른 선택 다시 하기|궁에 닿지 못함/);
+    else if(!changed)assert.ok(selecting.html().includes(outcome),rank+':'+step+':'+option);
     specific.add(outcome);
-    assert.ok(selecting.els['#reader'].children.some(child=>child.html?.includes('이서가 확인한 단서')));
+    if(!fell)assert.ok(selecting.els['#reader'].children.some(child=>child.html?.includes('이서가 확인한 단서')));
   }
   for(const [end,answers] of pathsByRank[rank].entries()){
     storage.set(current,JSON.stringify({answers,reaction:false}));
@@ -197,6 +202,7 @@ for(const rank of [2,3,4,5]){
     const journey=[0,invited,0,child,answer,preparation,1];
     storage.set(current,JSON.stringify({answers:journey,reaction:true}));
     const gate=open(s2);
+    if([3,4,5,6].some(k=>gate.value('midFatal('+JSON.stringify(journey.slice(0,k))+')'))){assert.match(gate.html(),/궁에 닿지 못함/);continue;}
     assert.equal(gate.buttons().length,3);
     assert.equal(gate.html().includes('data-art="r13"'),child===1);
     assert.equal(gate.html().includes('data-art="n8"'),answer===1);
@@ -228,6 +234,7 @@ for(const rank of [2,3,4,5]){
   ];
   for(const {choices,key,person,onGate} of variants){
     let p;
+    if([3,4,5,6].some(k=>open(s2).value('midFatal('+JSON.stringify(choices.slice(0,k))+')')))continue; // 이 신분은 이 길에서 궁에 닿지 못한다
     for(let step=0;step<8;step++){
       storage.set(current,JSON.stringify({answers:choices.slice(0,step),reaction:step>0}));
       p=open(s2);
