@@ -98,3 +98,4 @@ html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech,.talk){transi
   .cut-bar .cut-text,.cut-bar .cut-toggle{font-size:.72rem;padding:6px 7px}
   .cut-count{min-width:40px;font-size:.85rem}
 }
+.cut-bar .cut-voice{font-size:.8rem;padding:6px 8px}@media (max-width:440px){.cut-bar .cut-voice{font-size:.72rem;padding:6px 7px}}
