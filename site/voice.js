@@ -15,6 +15,8 @@
 
   function norm(t){return t.replace(/[“”"]/g,'').replace(/\s+/g,' ').trim();}
   function lineOf(el){const q=el.querySelector('blockquote, q');return q?norm(q.textContent):'';}
+  // 같은 대사를 여러 인물이 말할 수 있으면(시즌 2의 동행) '인물|대사'로 먼저 찾는다
+  function idOf(el){const t=lineOf(el);if(!t)return null;const s=el.querySelector('strong, cite, .who');const who=s?norm(s.textContent):'';return (who&&lines[who+'|'+t])||lines[t]||null;}
   function duck(down){
     if(down){ducked=[...document.querySelectorAll('audio')].filter(a=>a!==player&&!a.paused);ducked.forEach(a=>{a.dataset.vol=a.volume;a.volume=Math.min(a.volume,0.25);});}
     else{ducked.forEach(a=>{a.volume=+a.dataset.vol||1;});ducked=[];}
@@ -41,21 +43,21 @@
   }
   function speak(cut){
     stop();
-    queue=[...cut.querySelectorAll(BUBBLE)].map(lineOf).map(t=>lines[t]).filter(Boolean);
-    cut.querySelectorAll(BUBBLE).forEach(b=>{if(lines[lineOf(b)])b.classList.add('has-voice');});
+    queue=[...cut.querySelectorAll(BUBBLE)].map(idOf).filter(Boolean);
+    cut.querySelectorAll(BUBBLE).forEach(b=>{if(idOf(b))b.classList.add('has-voice');});
     next();
   }
   function check(){
     const cut=current();
     if(cut===lastCut)return;
     lastCut=cut;
-    if(cut)cut.querySelectorAll(BUBBLE).forEach(b=>{if(lines[lineOf(b)])b.classList.add('has-voice');});
+    if(cut)cut.querySelectorAll(BUBBLE).forEach(b=>{if(idOf(b))b.classList.add('has-voice');});
     if(on&&cut)speak(cut);else stop();
   }
   // 말풍선을 누르면 그 대사만 다시 듣는다
   reader.addEventListener('click',e=>{
     const b=e.target.closest(BUBBLE);if(!b)return;
-    const id=lines[lineOf(b)];if(!id)return;
+    const id=idOf(b);if(!id)return;
     e.stopPropagation();stop();queue=[id];next();
   },true);
   new MutationObserver(()=>requestAnimationFrame(check)).observe(reader,{subtree:true,attributes:true,attributeFilter:['class'],childList:true});

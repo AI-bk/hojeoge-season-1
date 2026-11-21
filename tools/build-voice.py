@@ -36,11 +36,20 @@ def main():
                             '-af', 'silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=start_periods=1:start_threshold=-45dB,areverse,apad=pad_dur=0.15',
                             '-ac', '1', '-ar', '24000', '-b:a', '48k', dest], check=True)
             added.append(base)
+    speakers_of = {}
+    for row in script.values():
+        t = norm(row['대사'])
+        speakers_of[t] = speakers_of.get(t, 0) + 1
     lines = {}
     for path in sorted(glob.glob(os.path.join(OUT, '*.mp3'))):
         base = os.path.splitext(os.path.basename(path))[0]
         if base in script:
-            lines[norm(script[base]['대사'])] = base
+            row = script[base]
+            text = norm(row['대사'])
+            if speakers_of.get(text, 0) > 1:
+                lines[norm(row.get('인물', '')) + '|' + text] = base
+            else:
+                lines[text] = base
     with open(os.path.join(ROOT, 'site', 'voice-lines.js'), 'w', encoding='utf-8') as f:
         f.write('// tools/build-voice.py가 만든다. 대사 글자 → site/voice/<번호>.mp3\n')
         f.write('var VOICE_LINES = ' + json.dumps(lines, ensure_ascii=False, indent=0) + ';\n')
