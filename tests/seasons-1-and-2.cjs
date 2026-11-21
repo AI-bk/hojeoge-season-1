@@ -29,7 +29,7 @@ for(let route=0;route<3;route++)for(let claim=0;claim<2;claim++){
   one=open([s1]);
   assert.equal(one.html(),mark);
   one.pick(0);
-  assert.match(one.html(),/나루로 내려가 배를 묶던 옥례[\s\S]*옥례가 나루 헛간 문/);
+  assert.match(one.html(),/나루에서 옥례를 찾았다[\s\S]*헛간 짚 위에 아이들/);
   one.pick(1);one.pick(route);one.pick(claim);
   assert.equal(one.value('state.rank'),rank);
   assert.equal(one.value('state.page'),6);
@@ -265,7 +265,7 @@ for(const moves of [[0,0,0],[0,0,-1],[0,0,0,0,0,-2],[]]){
   assert.doesNotMatch(jailed.html(),/숨을 거뒀|시즌 2 이어 읽기|생전 마지막 신분/);
   assert.deepEqual(Array.from(jailed.html().matchAll(/data-bonded-art="(\d)"/g),m=>m[1]),['0','1','3','2']);
   if(moves.at(-1)<0)assert.match(jailed.html(),/보증이 효력을 잃었다/);
-  if(moves.length===3&&moves.at(-1)===0)assert.match(jailed.html(),/창고지기와 곡식을 나른 사람의 말이 달랐다/);
+  if(moves.length===3&&moves.at(-1)===0)assert.match(jailed.html(),/창고지기와 짐꾼의 말이 달랐다/);
   jailed.pick(0);
   assert.match(jailed.html(),/최종 신분[\s\S]*노비[\s\S]*여천 관아의 옥/);
   assert.doesNotMatch(jailed.html(),/시즌 2 이어 읽기|생전 마지막 신분/);
