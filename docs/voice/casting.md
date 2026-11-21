@@ -31,3 +31,8 @@
 - 대사 글자를 바꾸지 않는다. 바꾸면 사이트가 그 대사를 찾지 못해 소리가 나지 않는다.
 - 한 파일에 한 대사만. 앞뒤 무음은 0.3초 안쪽.
 - 저장 위치: Google Drive 「호적에 없는 봄/음성/시즌1」 (시즌별 폴더).
+
+## Drive 폴더
+- 「호적에 없는 봄/음성」 ID 1-pwL9Vj8Uhuo295oeml90dGPUJBQ65hi, 그 아래 「시즌1」 ID 1NwoIApsek03LaqPTWj5szN_WJMR527DI
+- 제미나이용 대본 문서: 「성우 대본 · 시즌1 시범 (S1-V001~011) + 배역표」 (음성 폴더 안)
+- 반영: `python3 tools/build-voice.py <내려받은 폴더>` → site/voice/*.mp3, site/voice-lines.js
