@@ -8,7 +8,8 @@
   const KEY='hojeoge-voice';
   const CUT='section.comic-beat, figure.beat, section.frame, section.story-cut, section.branch-cut';
   const BUBBLE='.dialogue, .talk, .speech';
-  let on=false;try{on=localStorage.getItem(KEY)==='1';}catch(e){}
+  // 기본은 자동 재생. 「대사 끄기」를 누른 사람만 꺼진 채로 기억한다
+  let on=true;try{on=localStorage.getItem(KEY)!=='0';}catch(e){}
   const player=new Audio();player.preload='auto';
   let queue=[],lastCut=null,ducked=[];
 
@@ -26,6 +27,14 @@
     player.play().then(()=>duck(true)).catch(()=>{queue=[];});
   }
   player.addEventListener('ended',next);
+  // 휴대폰은 첫 터치 전엔 소리를 막는다: 첫 터치 때 무음을 한 번 재생해 재생 권한을 받아 둔다
+  let unlocked=false;
+  const SILENT='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
+  function unlock(){
+    if(unlocked)return;unlocked=true;
+    if(!player.src||player.paused){const keep=player.src;player.src=SILENT;player.play().then(()=>{player.pause();if(keep)player.src=keep;if(on){lastCut=null;check();}}).catch(()=>{unlocked=false;});}
+  }
+  ['touchend','click','keydown'].forEach(t=>document.addEventListener(t,unlock,{capture:true,passive:true}));
   function current(){
     const cuts=[...reader.querySelectorAll(CUT)].filter(c=>!c.classList.contains('cut-hide')&&c.offsetParent);
     return document.documentElement.classList.contains('cut-mode')?cuts[0]:null;
@@ -33,12 +42,14 @@
   function speak(cut){
     stop();
     queue=[...cut.querySelectorAll(BUBBLE)].map(lineOf).map(t=>lines[t]).filter(Boolean);
+    cut.querySelectorAll(BUBBLE).forEach(b=>{if(lines[lineOf(b)])b.classList.add('has-voice');});
     next();
   }
   function check(){
     const cut=current();
     if(cut===lastCut)return;
     lastCut=cut;
+    if(cut)cut.querySelectorAll(BUBBLE).forEach(b=>{if(lines[lineOf(b)])b.classList.add('has-voice');});
     if(on&&cut)speak(cut);else stop();
   }
   // 말풍선을 누르면 그 대사만 다시 듣는다

@@ -99,3 +99,8 @@ html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech,.talk){transi
   .cut-count{min-width:40px;font-size:.85rem}
 }
 .cut-bar .cut-voice{font-size:.8rem;padding:6px 8px}@media (max-width:440px){.cut-bar .cut-voice{font-size:.72rem;padding:6px 7px}}
+/* 녹음이 있는 말풍선: 눌러서 다시 듣기 */
+.has-voice{cursor:pointer;position:relative}
+.has-voice::after{content:"🔊";position:absolute;right:6px;bottom:3px;font-size:.62rem;opacity:.55}
+html.cut-mode .cut-overlay:not(.overlay-off) .has-voice{padding-right:22px!important}
+html.cut-mode .cut-overlay:not(.overlay-off) .has-voice{pointer-events:auto}
