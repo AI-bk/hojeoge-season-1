@@ -51,21 +51,21 @@ html.cut-mode .cut-overlay:not(.overlay-off)>:is(.beat-text,.frame-body,.story-t
 html.cut-mode .cut-overlay:not(.overlay-off) :is(.beat-text>p,.frame-caption,.story-text>p,figcaption>p){
   background:rgba(250,244,228,.94);color:#2a2418;font-size:.86rem;line-height:1.45;padding:6px 10px;border-radius:3px;
   max-width:88%;margin:0 0 6px;box-shadow:0 1px 4px rgba(0,0,0,.35);border:0}
-html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech){
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech,.talk){
   margin:6px 0 0!important;background:#fffdf6!important;color:#1e1e1e!important;border:0!important;border-radius:16px;
   padding:6px 13px!important;max-width:86%;box-shadow:0 1px 5px rgba(0,0,0,.4);line-height:1.45}
-html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech):first-of-type{margin-top:auto!important}
-html.cut-mode .cut-overlay.with-choices:not(.overlay-off) :is(.dialogue,.speech):first-of-type{margin-top:0!important}
-html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech):nth-of-type(2n){align-self:flex-end}
-html.cut-mode .cut-overlay:not(.overlay-off) .dialogue figcaption,html.cut-mode .cut-overlay:not(.overlay-off) .speech strong{
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech,.talk):first-of-type{margin-top:auto!important}
+html.cut-mode .cut-overlay.with-choices:not(.overlay-off) :is(.dialogue,.speech,.talk):first-of-type{margin-top:0!important}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech,.talk):nth-of-type(2n){align-self:flex-end}
+html.cut-mode .cut-overlay:not(.overlay-off) .dialogue figcaption,html.cut-mode .cut-overlay:not(.overlay-off) .speech strong,html.cut-mode .cut-overlay:not(.overlay-off) .talk strong{
   display:block;font-size:.74rem;color:#6b5a35!important;margin:0 0 1px;background:none;padding:0;box-shadow:none}
-html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue blockquote,.speech q){margin:0;font-size:.92rem;color:#1e1e1e!important;display:block}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue blockquote,.speech q,.talk q){margin:0;font-size:.92rem;color:#1e1e1e!important;display:block}
 html.cut-mode .cut-overlay:not(.overlay-off) .cut-choice-panel,
 html.cut-mode .cut-overlay:not(.overlay-off)>.frame-body>.choices{
   position:absolute;left:0;right:0;bottom:0;z-index:2;padding:30px 10px 10px;pointer-events:auto;
   background:linear-gradient(rgba(12,18,15,0),rgba(12,18,15,.9) 26px)}
-html.cut-mode .cut-overlay:not(.overlay-off) .cut-choice-panel :is(.decision-stakes,.decision-question,.comic-flow){margin:0 0 6px;padding:0;color:#f3ead8;font-size:.82rem;line-height:1.4}
-html.cut-mode .cut-overlay:not(.overlay-off) .cut-choice-panel .decision-question{color:#f3d58d;font-size:1rem}
+html.cut-mode .cut-overlay:not(.overlay-off) .cut-choice-panel :is(.decision-stakes,.decision-question,.question,.comic-flow){margin:0 0 6px;padding:0;color:#f3ead8;font-size:.82rem;line-height:1.4}
+html.cut-mode .cut-overlay:not(.overlay-off) .cut-choice-panel :is(.decision-question,.question){color:#f3d58d;font-size:1rem}
 html.cut-mode .cut-overlay:not(.overlay-off) :is(.cut-choice-panel,.frame-body) .choices{display:flex;flex-direction:column;gap:6px;margin:0}
 html.cut-mode .cut-overlay:not(.overlay-off) :is(.cut-choice-panel,.frame-body) .choices button{
   width:100%;margin:0;text-align:left;background:rgba(20,30,25,.72);color:#fffaf0;border:1px solid rgba(243,213,141,.75);
@@ -75,21 +75,21 @@ html.cut-mode .cut-overlay:not(.overlay-off) .dialogue figcaption strong{color:#
 html.cut-mode .cut-overlay.choices-below:not(.overlay-off){overflow:visible}
 html.cut-mode .cut-overlay.choices-below:not(.overlay-off)>:is(.beat-text,.frame-body,.story-text,figcaption){bottom:auto;height:var(--art-h,auto)}
 html.cut-mode .cut-overlay.choices-below:not(.overlay-off) .cut-choice-panel{position:static;background:#0c120f;padding:10px;border-radius:0 0 6px 6px}
-html.cut-mode .cut-overlay.choices-below:not(.overlay-off) :is(.dialogue,.speech):first-of-type{margin-top:auto!important}
+html.cut-mode .cut-overlay.choices-below:not(.overlay-off) :is(.dialogue,.speech,.talk):first-of-type{margin-top:auto!important}
 /* 그림을 덜 가리게: 해설은 그림 위쪽 띠(그림 밖), 말풍선은 작게 아래 가장자리, 이름은 대사와 한 줄 */
 html.cut-mode .cut-overlay:not(.overlay-off){overflow:visible;margin-top:calc(var(--narr-h,0px) + 10px)!important;border-radius:0}
 html.cut-mode .cut-overlay:not(.overlay-off)>[aria-hidden="true"],html.cut-mode .cut-overlay:not(.overlay-off)>.picture{border-radius:6px}
 html.cut-mode .cut-overlay:not(.overlay-off) .cut-narration{position:absolute;left:0;right:0;bottom:100%;max-width:none!important;
   margin:0 0 6px!important;background:none!important;box-shadow:none!important;color:#efe6d2!important;padding:0 2px!important;font-size:.92rem!important}
 html.cut-mode .cut-overlay:not(.overlay-off)>:is(.beat-text,.frame-body,.story-text,figcaption){padding:8px;overflow:visible}
-html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech){padding:4px 11px!important;max-width:74%;border-radius:13px;
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech,.talk){padding:4px 11px!important;max-width:74%;border-radius:13px;
   background:rgba(255,253,246,.9)!important;margin-top:4px!important}
-html.cut-mode .cut-overlay:not(.overlay-off) .dialogue figcaption,html.cut-mode .cut-overlay:not(.overlay-off) .speech strong{display:inline;margin-right:6px;font-size:.72rem}
+html.cut-mode .cut-overlay:not(.overlay-off) .dialogue figcaption,html.cut-mode .cut-overlay:not(.overlay-off) .speech strong,html.cut-mode .cut-overlay:not(.overlay-off) .talk strong{display:inline;margin-right:6px;font-size:.72rem}
 html.cut-mode .cut-overlay:not(.overlay-off) .dialogue figcaption strong::after{content:''}
-html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue blockquote,.speech q){display:inline;font-size:.86rem;line-height:1.4}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue blockquote,.speech q,.talk q){display:inline;font-size:.86rem;line-height:1.4}
 html.cut-mode .cut-overlay:not(.overlay-off) .dialogue{display:block}
-html.cut-text-hidden.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech){opacity:0;transition:opacity .15s}
-html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech){transition:opacity .15s}
+html.cut-text-hidden.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech,.talk){opacity:0;transition:opacity .15s}
+html.cut-mode .cut-overlay:not(.overlay-off) :is(.dialogue,.speech,.talk){transition:opacity .15s}
 .cut-bar .cut-text{font-size:.8rem;padding:6px 8px;opacity:.85}
 .cut-bar button{white-space:nowrap}
 @media (max-width:440px){

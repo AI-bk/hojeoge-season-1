@@ -13,7 +13,7 @@
   // 글이 그림을 넘치는 컷은 그 컷만 예전처럼 그림 아래에 글을 둔다.
   const overlayPage=document.body.classList.contains('overlay-cuts');
   const TEXT=':scope>.beat-text, :scope>.frame-body, :scope>.story-text, :scope>figcaption';
-  const CHOICEY='.choices, .decision-question, .decision-stakes';
+  const CHOICEY='.choices, .decision-question, .decision-stakes, .question';
 
   const bar=document.createElement('nav');
   bar.className='cut-bar';
