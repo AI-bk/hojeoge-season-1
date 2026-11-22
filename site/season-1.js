@@ -114,7 +114,10 @@ const pageTracks={'-1':'00-theme',0:'04-prologue',1:'06-night-record',2:'01-main
   5:'05-ferry',6:'05-ferry',7:'08-grain',8:'02-tension',9:'09-lesson',10:'07-memorial',11:'02-tension',12:'06-night-record',13:'10-dawn',14:'10-dawn'};
 const endingTracks=[['03-evening','03-evening','03-evening'],['05-ferry','05-ferry','07-memorial'],['08-grain','08-grain','08-grain'],
   ['03-evening','03-evening','03-evening'],['09-lesson','03-evening','03-evening'],['07-memorial','03-evening','03-evening']];
+// 2026-11-22: 시즌 1은 사용자가 만든 주제곡(가사 있음)을 처음부터 끝까지 깐다. 장면별 곡 표는 되돌릴 때를 위해 남겨 둔다.
+const seasonTheme='s1-00-theme';
 function sceneTrack(){
+  if(seasonTheme)return seasonTheme;
   const p=state.page;
   if(p>=15){
     if(state.finalRecordOpen)return 's1-00-theme';

@@ -18,7 +18,7 @@
   // 같은 대사를 여러 인물이 말할 수 있으면(시즌 2의 동행) '인물|대사'로 먼저 찾는다
   function idOf(el){const t=lineOf(el);if(!t)return null;const s=el.querySelector('strong, cite, .who');const who=s?norm(s.textContent):'';return (who&&lines[who+'|'+t])||lines[t]||null;}
   function duck(down){
-    if(down){ducked=[...document.querySelectorAll('audio')].filter(a=>a!==player&&!a.paused);ducked.forEach(a=>{a.dataset.vol=a.volume;a.volume=Math.min(a.volume,0.25);});}
+    if(down){if(ducked.length)return;ducked=[...document.querySelectorAll('audio')].filter(a=>a!==player&&!a.paused);ducked.forEach(a=>{a.dataset.vol=a.volume;a.volume=a.volume*0.4;});}
     else{ducked.forEach(a=>{a.volume=+a.dataset.vol||1;});ducked=[];}
   }
   function stop(){queue=[];player.pause();duck(false);}
