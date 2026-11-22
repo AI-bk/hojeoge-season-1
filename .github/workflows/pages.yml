@@ -13,12 +13,11 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# 2026-11-22: 올리기와 배포를 한 작업에서 이어 하면, 배포 단계가 방금 올린 묶음을 아직 못 찾아 실패하곤 했다.
+# 그래서 build(검사·올리기)와 deploy(배포)를 따로 나눈다. 배포만 실패하면 deploy 작업만 다시 실행하면 된다.
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - name: Run story tests
@@ -29,5 +28,13 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
