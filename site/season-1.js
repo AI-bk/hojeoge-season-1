@@ -109,22 +109,24 @@ loadButton.onclick=()=>{
   commit(()=>{state=mark.progress});
   refreshSaveControls('불러옴 · '+mark.title);
 };
-// 시즌 1 전용 배경음악: 장면의 장소와 분위기에 맞춰 고른다.
-const pageTracks={'-1':'00-theme',0:'04-prologue',1:'06-night-record',2:'01-main',3:'07-memorial',4:'02-tension',
-  5:'05-ferry',6:'05-ferry',7:'08-grain',8:'02-tension',9:'09-lesson',10:'07-memorial',11:'02-tension',12:'06-night-record',13:'10-dawn',14:'10-dawn'};
-const endingTracks=[['03-evening','03-evening','03-evening'],['05-ferry','05-ferry','07-memorial'],['08-grain','08-grain','08-grain'],
-  ['03-evening','03-evening','03-evening'],['09-lesson','03-evening','03-evening'],['07-memorial','03-evening','03-evening']];
-// 2026-11-22: 시즌 1은 사용자가 만든 주제곡(가사 있음)을 처음부터 끝까지 깐다. 장면별 곡 표는 되돌릴 때를 위해 남겨 둔다.
-const seasonTheme='s1-00-theme';
+// 시즌 1 전용 배경음악: 사용자가 만든 시즌 1 OST 10곡을 장면의 장소와 분위기에 맞춰 깐다(2026-11-22).
+// 제목 화면과 마지막 기록에는 가사가 있는 주제곡(s1-00-theme)을 쓴다.
+// ost 01 돌아올 길에 등불을 · 02 지워진 한 줄 · 03 먹빛을 건너 · 04 아이들이 잠든 밤 · 05 푸른 실의 매듭
+// 06 각자의 새벽 · 07 배를 묶어다오 · 08 함께 쌓은 흙 · 09 떨리는 붓끝 · 10 창살 너머에도 봄은
+const ost={prologue:'ost-01',nightRecord:'ost-02',main:'ost-03',memorial:'ost-04',lesson:'ost-05',
+  dawn:'ost-06',ferry:'ost-07',grain:'ost-08',tension:'ost-09',evening:'ost-10'};
+const pageTracks={'-1':'00-theme',0:ost.prologue,1:ost.nightRecord,2:ost.main,3:ost.memorial,4:ost.tension,
+  5:ost.ferry,6:ost.ferry,7:ost.grain,8:ost.tension,9:ost.lesson,10:ost.memorial,11:ost.tension,12:ost.nightRecord,13:ost.dawn,14:ost.dawn};
+const endingTracks=[[ost.evening,ost.evening,ost.evening],[ost.ferry,ost.ferry,ost.memorial],[ost.grain,ost.grain,ost.grain],
+  [ost.evening,ost.evening,ost.evening],[ost.lesson,ost.evening,ost.evening],[ost.memorial,ost.evening,ost.evening]];
 function sceneTrack(){
-  if(seasonTheme)return seasonTheme;
   const p=state.page;
   if(p>=15){
     if(state.finalRecordOpen)return 's1-00-theme';
-    return 's1-'+((endingTracks[state.rank]||[])[state.ending]||'03-evening');
+    return 's1-'+((endingTracks[state.rank]||[])[state.ending]||ost.evening);
   }
-  if(p===14&&state.rank===1&&state.rankLead!==undefined)return 's1-05-ferry';
-  return 's1-'+(pageTracks[p]||'01-main');
+  if(p===14&&state.rank===1&&state.rankLead!==undefined)return 's1-'+ost.ferry;
+  return 's1-'+(pageTracks[p]||ost.main);
 }
 let musicEnabled=restore('music',true);
 let musicStarted=false;
