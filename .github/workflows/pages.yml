@@ -1,9 +1,7 @@
 name: Deploy site to GitHub Pages
 
+# 커밋할 때마다 배포하면 배포가 몰려 실패가 잦아서, 하루 한 번 모아서 손으로(workflow_dispatch) 배포한다.
 on:
-  push:
-    branches: [ccr-064d9690-3wsuth, main]
-    paths: ['site/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 
 permissions:
@@ -13,7 +11,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
