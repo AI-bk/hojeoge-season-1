@@ -43,15 +43,18 @@ const load=document.querySelector('#load');
 const status=document.querySelector('#status');
 const music=document.querySelector('#music');
 const score=document.querySelector('#score');
-let scoreChoice=read('yeocheon-season-two-music',read('yeocheon-season-one-v1music',false));
+let scoreChoice=read('yeocheon-season-two-music',read('yeocheon-season-one-v1music',true));
 let scoreTrack='';
+const seasonTheme='s2-00-theme';
+score.volume=.32; // 시즌 1 주제곡과 같은 크기로 들리게
 function updateScore(){
   music.textContent=score.paused?'배경음악 켜기':'배경음악 끄기';
   music.setAttribute('aria-pressed',String(!score.paused));
 }
 function syncScore(){
   if(!scoreChoice){score.pause();updateScore();return;}
-  const track=progress.answers.length>=7?'spring':progress.answers.length>=3?'night-ferry':'after-rain';
+  // 2026-11-22: 시즌 2는 사용자가 만든 주제곡을 처음부터 끝까지 깐다(이전 장면별 곡은 seasonTheme을 비우면 돌아온다).
+  const track=seasonTheme||(progress.answers.length>=7?'spring':progress.answers.length>=3?'night-ferry':'after-rain');
   if(track!==scoreTrack){
     score.src='audio/'+track+'.mp3';
     scoreTrack=track;
