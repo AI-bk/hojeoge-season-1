@@ -1,4 +1,4 @@
-# 시즌 4 음악 프롬프트 (주제곡 + 1~4막)
+# 시즌 4 음악 프롬프트 (주제곡 + 1~6막)
 
 > 음악 생성 도구에 그대로 붙여 넣는다. 스타일 칸은 영어가 잘 먹히는 경우가 많아 영어로 적었다.
 > 공통: 2분 안팎, 사이트에서 반복 재생되므로 끝이 처음으로 자연스럽게 이어지게. 대사 아래에 깔리므로 1~4막은 노래 없이(인스트루멘털).
@@ -87,5 +87,15 @@ Dark Korean historical instrumental, low ajaeng drone with muted strings and slo
 Delicate Korean palace instrumental, light gayageum arpeggios and plucked strings with soft piano, 76 BPM, careful hands sorting silk thread in a sewing room, quiet discovery and curiosity, a small hopeful motif, subtle suspense underneath, seamless loop, no vocals
 ```
 
+## 5막 · 두 개의 인장 (인스트루멘털)
+```
+Tense Korean historical drama instrumental, slow ticking pizzicato strings with low geomungo, sparse janggu heartbeat, 72 BPM, two identical red seals side by side, a quiet but chilling revelation, suspense that tightens then holds, candlelit archive, seamless loop, no vocals
+```
+
+## 6막 · 연이의 대답 (인스트루멘털)
+```
+Tender Korean instrumental, warm piano with soft gayageum and gentle haegeum melody, 80 BPM, an older sister kneeling to talk with her little sister under a persimmon tree in late autumn, bittersweet and innocent, a child's honest answer, hopeful ending phrase, seamless loop, no vocals
+```
+
 ## 파일 이름 (올릴 때)
-`S4_OST_00_궁안의이름`, `S4_OST_01_문안의첫날`, `S4_OST_02_찻잔과장부`, `S4_OST_03_별채의밤`, `S4_OST_04_침방의실`
+`S4_OST_00_궁안의이름`, `S4_OST_01_문안의첫날`, `S4_OST_02_찻잔과장부`, `S4_OST_03_별채의밤`, `S4_OST_04_침방의실`, `S4_OST_05_두개의인장`, `S4_OST_06_연이의대답`
