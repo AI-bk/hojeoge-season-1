@@ -85,6 +85,9 @@ for(const rank of [2,3,4,5]){
     }
     assert.equal(game.eval('finalOutcome()'),outcome);
     assert.match(game.dom.markup,/궁에 남은 기록/);
+    assert.equal(JSON.parse(storage.get('yeocheon-season-four-v1latest')),game.eval('storageKey'),'S3 ending points S4 at this handoff');
+    assert.ok(storage.get('yeocheon-season-four-v1handoff:'+game.eval('storageKey')));
+    assert.ok(game.dom.querySelector('.verdict').children.some(c=>c.href==='season-4.html'),'S3 ending links to S4');
     game.globals.querySelector('#load').onclick();
     assert.equal(game.eval('progress.answers.length'),3);
     assert.match(game.dom.markup,/방금 고른 행동/);

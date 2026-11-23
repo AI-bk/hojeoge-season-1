@@ -335,10 +335,11 @@ function ending(){
   const entryFrame=frame(...newCut('S3-'+({2:53,3:54,4:55,5:56}[handoff.rank]),'r',14),
     '며칠 뒤, 날짜를 고치라 지시한 쪽지가 장부 틈에서 나왔다. 귀퉁이에는 대비전 지밀의 인장이, 접힌 안쪽에는 별채의 매듭이 남아 있었다. '+verdictHooks[outcome]+' 이서는 '+place.split('.')[0]+'.',
     '이서','여기서 멈추면 저 문 안쪽은 아무도 묻지 않을 거예요. 이번엔 제가 안으로 들어가겠습니다.');
-  try{localStorage.setItem('yeocheon-season-four-v1handoff:'+storageKey,JSON.stringify({version:1,rank:handoff.rank,verdict:outcome,rankGoal:{name:goalName,done},entry:place,journey:handoff.journey??null,witness:handoff.witness??null,answers:[...progress.answers]}));}catch(e){}
+  try{localStorage.setItem('yeocheon-season-four-v1handoff:'+storageKey,JSON.stringify({version:1,rank:handoff.rank,verdict:outcome,rankGoal:{name:goalName,done},entry:place,journey:handoff.journey??null,witness:handoff.witness??null,answers:[...progress.answers]}));localStorage.setItem('yeocheon-season-four-v1latest',JSON.stringify(storageKey));}catch(e){}
   reader.innerHTML=heading('시즌 3 완 · '+rankStories[handoff.rank][0],title)+frame(...newCut('S3-18','r',1),caption,'이서',line)+closingFrame+remedy+frame('s',8,'해가 뜨자 궁문 바깥까지 발소리가 들렸다. '+responsibility)+goalFrame+entryFrame+
     '<section class="verdict"><h2>궁에 남은 기록</h2><dl><dt>이서의 신분</dt><dd>'+text(rankStories[handoff.rank][0])+'</dd><dt>기록의 결말</dt><dd>'+text(title)+'</dd>'+'<dt>신분의 몫</dt><dd>'+text(goalName+' · '+(done?'이룸':'놓침'))+'</dd><dt>시즌 4 · 궁 안의 이름</dt><dd>'+text(place)+'</dd>'+(handoff.journey?'<dt>궁에 들기까지</dt><dd>'+text(journeyNote(handoff.journey))+'</dd>':'')+'</dl></section>';
-  reader.querySelector('.verdict').append(button('다른 선택으로 다시 읽기',()=>saveChange(()=>{
+  const onward=document.createElement('a');onward.className='link inline-action';onward.href='season-4.html';onward.textContent='시즌 4 · 궁 안의 이름으로';
+  reader.querySelector('.verdict').append(onward,button('다른 선택으로 다시 읽기',()=>saveChange(()=>{
     progress={answers:[],reaction:false};
   })));
 }
