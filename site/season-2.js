@@ -49,7 +49,7 @@ let scoreTrack='';
 // ost 01 여천에 남긴 이름 · 02 같은 봉투 다른 뜻 · 03 사람보다 먼저 간 명단 · 04 역참에서 만난 명선 · 05 돌아가라는 편지
 // 06 봉투를 전한 서겸 · 07 기록에 남은 수결 · 08 문 앞에서 말할 사람들 · 09 궁문에 올린 이름 · 10 봉인된 장부
 const seasonTheme='s2-00-theme';
-const ostReady04=false; // 04번 파일이 들어오면 true로 바꾼다. 그 전까지 3단계는 앞 곡(03)을 이어 깐다.
+const ostReady04=true; // 2026-11-23 04번 반영(false면 3단계는 앞 곡 03을 이어 깐다)
 const stepTracks=['01','01','03',ostReady04?'04':'03','05','06','07','08'];
 let fatalShown=false;
 function sceneTrack(){

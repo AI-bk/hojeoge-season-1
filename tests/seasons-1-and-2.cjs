@@ -96,7 +96,7 @@ for(const rank of [2,3,4,5])for(let ending=0;ending<6;ending++){
  for(const key of storage.keys())if(key.startsWith('yeocheon-season-two'))storage.delete(key);
  storage.set(s1key,JSON.stringify({...legacy,page:15,rank,ending:0,rankLead:1,departureRank:rank}));
  let two=open(s2);
- const ostAt=['01','01','03','03','05','06','07','08'];
+ const ostAt=['01','01','03','04','05','06','07','08'];
  assert.equal(two.value('sceneTrack()'),'s2-ost-01');
  for(const [step,choice] of paths[ending].entries()){
   assert.equal(two.buttons().length,3);
