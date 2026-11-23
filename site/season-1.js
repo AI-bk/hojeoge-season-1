@@ -45,6 +45,7 @@ const evidence = [
   '기술관 집안의 기록','문중의 입양 문서','종친가의 출생 편지와 왕실의 확인'
 ];
 const key = 'yeocheon-season-one-v1';
+function objectMark(word){const c=word.charCodeAt(word.length-1)-0xac00;return c>=0&&c<11172&&c%28===0?'를':'을';}
 function persist(name,value){try{localStorage.setItem(key+name,JSON.stringify(value));return true}catch{return false}}
 function restore(name,fallback){try{return JSON.parse(localStorage.getItem(key+name)) ?? fallback}catch{return fallback}}
 const threeChoiceOrders=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
@@ -520,7 +521,7 @@ function interludeMarkup(){
   const first=lines.slice(0,1);
   const answer=lines.slice(1);
   const finding=from>=6&&delta!==0
-    ? '심리에서는 '+evidence[state.rank]+'을 근거로 이서의 기록을 고쳤다. '+nextLead
+    ? '심리에서는 '+evidence[state.rank]+objectMark(evidence[state.rank])+' 근거로 이서의 기록을 고쳤다. '+nextLead
     : nextLead;
   const variant=delta===0?0:delta>0?1:2;
   const additions=from<5

@@ -88,10 +88,10 @@
 // 언어 바꾸기 단추: 페이지의 nav(또는 data-lang-slot) 끝에 붙인다
 document.addEventListener('DOMContentLoaded',function(){
   var api=window.HOJEOGE_I18N;if(!api)return;
-  var slot=document.querySelector('[data-lang-slot]')||document.querySelector('nav');
+  var slot=document.querySelector('[data-lang-slot]')||document.querySelector('main nav, body > nav, nav');
   if(!slot)return;
   var b=document.createElement('button');b.type='button';b.className='lang-toggle';b.setAttribute('data-no-i18n','');
-  b.textContent=api.lang==='en'?'한국어':'English';
+  b.textContent=api.lang==='en'?'한국어':'EN';b.style.cssText='font-size:.78rem;padding:4px 8px;min-height:0';
   b.setAttribute('lang',api.lang==='en'?'ko':'en');
   b.setAttribute('aria-label',api.lang==='en'?'한국어로 보기':'Read in English');
   b.onclick=function(){api.set(api.lang==='en'?'ko':'en');};
