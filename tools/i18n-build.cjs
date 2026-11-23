@@ -10,7 +10,7 @@ for(const f of fs.existsSync(dir)?fs.readdirSync(dir).filter(f=>f.endsWith('.tsv
     if(tab<0)throw new Error(f+':'+(i+1)+' 탭이 없습니다');
     const ko=line.slice(0,tab).replace(/\s+/g,' ').trim(),en=line.slice(tab+1).trim();
     if(!en)continue;
-    if(dict[ko]!=null&&dict[ko]!==en)dup++;
+    if(dict[ko]!=null){if(dict[ko]!==en)dup++;continue;} // 먼저 나온 번역(손으로 다듬은 파일이 앞 번호)을 남긴다
     dict[ko]=en;
   }
 }
@@ -19,7 +19,7 @@ fs.mkdirSync(path.dirname(out),{recursive:true});
 fs.writeFileSync(out,'// tools/i18n-build.cjs가 docs/i18n/en/*.tsv로 만든다. 직접 고치지 않는다.\nwindow.I18N_EN='+JSON.stringify(dict)+';\n');
 const seen=JSON.parse(fs.readFileSync(path.join(__dirname,'../docs/i18n/ko-sentences.json'),'utf8'));
 const report=Object.entries(seen).map(([k,list])=>{const miss=list.filter(s=>dict[s]==null);return [k,list.length,miss];});
-console.log('entries',Object.keys(dict).length,'(conflicting duplicates '+dup+')');
+console.log('entries',Object.keys(dict).length,'(later duplicates ignored '+dup+')');
 for(const [k,n,miss] of report)console.log(k,'translated',n-miss.length,'/',n);
 const i=process.argv.indexOf('--missing');
 if(i>0){const k=process.argv[i+1],n=+process.argv[i+2]||50;const r=report.find(x=>x[0]===k);console.log((r?r[2]:[]).slice(0,n).join('\n'));}
