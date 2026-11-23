@@ -34,8 +34,16 @@
     var parts=split(whole),out=[],hit=false;
     for(var i=0;i<parts.length;i++){
       var p=parts[i];
-      if(d[p]!=null){out.push(d[p]);hit=true;}
-      else{out.push(p);if(HANGUL.test(p))missing.add(p);}
+      if(d[p]!=null){out.push(d[p]);hit=true;continue;}
+      // 「가 · 나 · 다」처럼 가운뎃점으로 이은 목록은 조각마다 찾는다
+      var bits=p.split(' · ');
+      if(bits.length>1){
+        var got=bits.map(function(b){return d[b]!=null?d[b]:(d[b.replace(/[.]$/,'')]!=null?d[b.replace(/[.]$/,'')]+(/[.]$/.test(b)?'.':''):null);});
+        if(got.some(function(g){return g!=null;})){
+          out.push(bits.map(function(b,j){if(got[j]==null&&HANGUL.test(b))missing.add(b);return got[j]!=null?got[j]:b;}).join(' · '));hit=true;continue;
+        }
+      }
+      out.push(p);if(HANGUL.test(p))missing.add(p);
     }
     return hit?out.join(' '):null;
   }
