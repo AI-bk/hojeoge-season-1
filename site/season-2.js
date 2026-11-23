@@ -45,7 +45,20 @@ const music=document.querySelector('#music');
 const score=document.querySelector('#score');
 let scoreChoice=read('yeocheon-season-two-music',read('yeocheon-season-one-v1music',true));
 let scoreTrack='';
+// 2026-11-23: 사용자가 만든 시즌 2 OST를 장면별로 깐다. 주제곡(s2-00-theme)은 시즌 1 결말이 없어 시작하지 못하는 첫 화면에 쓴다.
+// ost 01 여천에 남긴 이름 · 02 같은 봉투 다른 뜻 · 03 사람보다 먼저 간 명단 · 04 역참에서 만난 명선 · 05 돌아가라는 편지
+// 06 봉투를 전한 서겸 · 07 기록에 남은 수결 · 08 문 앞에서 말할 사람들 · 09 궁문에 올린 이름 · 10 봉인된 장부
 const seasonTheme='s2-00-theme';
+const ostReady04=false; // 04번 파일이 들어오면 true로 바꾼다. 그 전까지 3단계는 앞 곡(03)을 이어 깐다.
+const stepTracks=['01','01','03',ostReady04?'04':'03','05','06','07','08'];
+let fatalShown=false;
+function sceneTrack(){
+  if(!inherited)return seasonTheme;
+  if(fatalShown)return 's2-ost-02';
+  const step=progress.answers.length; // 화면에 나온 장면(sceneStep은 반응 칸에서 앞 장면으로 바뀌므로 쓰지 않는다)
+  if(step>=8)return 's2-ost-'+(endingIndex(progress.answers)===0?'10':'09');
+  return 's2-ost-'+(stepTracks[step]||'01');
+}
 score.volume=.32; // 시즌 1 주제곡과 같은 크기로 들리게
 function updateScore(){
   music.textContent=score.paused?'배경음악 켜기':'배경음악 끄기';
@@ -53,8 +66,7 @@ function updateScore(){
 }
 function syncScore(){
   if(!scoreChoice){score.pause();updateScore();return;}
-  // 2026-11-22: 시즌 2는 사용자가 만든 주제곡을 처음부터 끝까지 깐다(이전 장면별 곡은 seasonTheme을 비우면 돌아온다).
-  const track=seasonTheme||(progress.answers.length>=7?'spring':progress.answers.length>=3?'night-ferry':'after-rain');
+  const track=sceneTrack();
   if(track!==scoreTrack){
     score.src='audio/'+track+'.mp3';
     scoreTrack=track;
@@ -217,6 +229,7 @@ function roadFall(answers){
   return null;
 }
 function fatalFinale(fate){
+  fatalShown=true;
   const [title,place,beats]=fatalEndings[fate];
   // 시즌 3가 이 기록을 이어받지 않도록 문 밖이 아닌 곳으로 남긴다.
   write('yeocheon-season-three-v1handoff:'+inherited.key,{version:1,rank:inherited.rank,location:place,fate,routeSelections:[...progress.answers]});
@@ -612,6 +625,7 @@ function refreshControls(message){
   status.textContent=message|| (validProgress(mark)?'수동 저장 · '+Math.max(1,Math.min(8,mark.answers.length+(mark.reaction?0:1)))+'단계':'');
 }
 function render(focus=false,message=''){
+  fatalShown=false;
   if(!inherited){
     reader.innerHTML='<div class="chapter">시즌 2</div><h1 tabindex="-1">궁문까지</h1><p class="intro">이 브라우저에 한양행으로 이어지는 시즌 1 결말이 없습니다. 시즌 1을 마치면 이어 읽을 수 있습니다.</p><p><a class="link primary" href="season-1.html">시즌 1로 돌아가기</a></p>';
   }else if(roadFall(progress.answers)){const fall=roadFall(progress.answers);progress.answers=progress.answers.slice(0,fall.at);sceneStep=fall.at;fatalFinale(fall.fate);reader.insertAdjacentHTML('afterbegin',previousAction());}
@@ -628,6 +642,7 @@ function render(focus=false,message=''){
   }
   refreshControls(message);
   if(focus){reader.querySelector('h1,h2')?.focus({preventScroll:true});window.scrollTo(0,0);}
+  if(!score.paused)syncScore(); // 이미 듣는 중이면 장면이 바뀔 때 곡도 바꾼다
 }
 save.onclick=()=>{
   if(!currentKey)return;
