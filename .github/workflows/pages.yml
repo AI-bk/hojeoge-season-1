@@ -25,6 +25,7 @@ jobs:
           node tests/seasons-1-and-2.cjs
           node tests/season-3.cjs
           node tests/season-4.cjs
+          node tests/i18n.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
