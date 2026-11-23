@@ -14,9 +14,11 @@
   let queue=[],lastCut=null,ducked=[];
 
   function norm(t){return t.replace(/[“”"]/g,'').replace(/\s+/g,' ').trim();}
-  function lineOf(el){const q=el.querySelector('blockquote, q');return q?norm(q.textContent):'';}
+  // 영어 화면에서는 i18n.js가 원문을 data-ko에 남긴다: 음성은 원문으로 찾고, 화면 글자는 자막이 된다
+  function ko(el){return el.getAttribute('data-ko')||el.textContent;}
+  function lineOf(el){const q=el.querySelector('blockquote, q');return q?norm(ko(q)):'';}
   // 같은 대사를 여러 인물이 말할 수 있으면(시즌 2의 동행) '인물|대사'로 먼저 찾는다
-  function idOf(el){const t=lineOf(el);if(!t)return null;const s=el.querySelector('strong, cite, .who');const who=s?norm(s.textContent):'';return (who&&lines[who+'|'+t])||lines[t]||null;}
+  function idOf(el){const t=lineOf(el);if(!t)return null;const s=el.querySelector('strong, cite, .who');const who=s?norm(ko(s)):'';return (who&&lines[who+'|'+t])||lines[t]||null;}
   function duck(down){
     if(down){if(ducked.length)return;ducked=[...document.querySelectorAll('audio')].filter(a=>a!==player&&!a.paused);ducked.forEach(a=>{a.dataset.vol=a.volume;a.volume=a.volume*0.4;});}
     else{ducked.forEach(a=>{a.volume=+a.dataset.vol||1;});ducked=[];}
