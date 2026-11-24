@@ -14,7 +14,8 @@ SLOTS1 = {'S1-%02d' % i: i-1 for i in range(1, 17)}
 SLOTS3 = {'S3-%02d' % i: i-1 for i in range(1, 69)}  # S3-45~52 신분 목표, S3-53~56 입궁, S3-57~68 궁 안의 실패
 # 시즌 4: 기본 칸 S4-01~79, 같은 장면의 덧칸(b·c), 실패 결말 S4-F01~21. 순서가 곧 칸 번호라 새 이름은 맨 뒤에만 붙인다.
 _extra4 = ['13b','16b','26b','30b','32b','35b','37b','40b','41b','42b','46b','47b','47c','58b','67b']
-SLOTS4 = {n: i for i, n in enumerate(['S4-%02d' % i for i in range(1, 80)] + ['S4-' + e for e in _extra4] + ['S4-F%02d' % i for i in range(1, 22)])}
+_variants4 = ['S4-%s@%s' % (k, o) for k in ('13', '42', '43', '47', '52') for o in ('MU', 'SE', 'UI', 'NA', 'OJ', 'BN')]  # 이서 옷이 신분마다 다른 핵심 장면
+SLOTS4 = {n: i for i, n in enumerate(['S4-%02d' % i for i in range(1, 80)] + ['S4-' + e for e in _extra4] + ['S4-F%02d' % i for i in range(1, 22)] + _variants4)}
 CELL = 400
 src = sys.argv[1]
 season = int(sys.argv[2]) if len(sys.argv) > 2 else 2

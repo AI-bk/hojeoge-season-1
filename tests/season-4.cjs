@@ -121,6 +121,16 @@ assert.equal((g.dom.markup.match(/data-slot="S4-F0[1-3]"/g)||[]).length,3);
 assert.equal(g.globals.querySelector('#score').src,'audio/s4-ost-e5.mp3');
 g.dom.querySelector('.verdict').children[0].onclick();
 assert.deepEqual(g.eval('progress.answers'),[0]);
+// 신분별 그림: '칸@옷'이 있으면 그 신분에서는 그것을, 없으면 공용 칸을 쓴다
+{
+  const keep=source[0];
+  source[0]="var NEW_CUT_SLOTS_4={'S4-13':0,'S4-13@NA':1,'S4-13@OJ':2};var NEW_CUT_ROWS_4=1;";
+  for(const [rank,done,want] of [[4,true,'S4-13@NA'],[5,true,'S4-13@OJ'],[5,false,'S4-13'],[2,true,'S4-13']]){
+    const g=enter(rank,done);
+    assert.match(g.dom.markup,new RegExp('data-cut="'+want+'"'),rank+' '+done+' uses '+want);
+  }
+  source[0]=keep;
+}
 // 음악 파일이 모두 있다
 for(const t of ['00','01','02','03','04','05','06','07','08','e1','e2','e3','e4','e5'])assert.ok(existsSync(root+'audio/s4-ost-'+t+'.mp3'),t);
 console.log('PASS: S3 handoff and fallback, all prefixes render for 8 rank/goal starts, 4 endings per rank, 7 fail endings, rank goals, harsher for higher rank ('+counts+'), every image slot used, button playthrough with save/reload, S5 handoff, music');

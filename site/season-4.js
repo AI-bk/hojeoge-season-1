@@ -102,8 +102,12 @@ function optionsFor(step){
 // ── 그림과 칸 ──
 function text(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function button(label,fn,className=''){const b=document.createElement('button');b.type='button';b.textContent=label;b.className=className;b.onclick=fn;return b;}
+// 이서의 옷(신분)에 따라 따로 그린 그림: '칸@옷' 이름이 있으면 그것을 먼저 쓴다
+const outfit4={'2true':'MU','2false':'MU','3true':'SE','3false':'UI','4true':'NA','4false':'NA','5true':'OJ','5false':'BN'};
 function art(slot){
   const slots=typeof NEW_CUT_SLOTS_4==='object'&&NEW_CUT_SLOTS_4?NEW_CUT_SLOTS_4:{};
+  const own=handoff?slot+'@'+outfit4[rk()]:'';
+  if(own in slots)slot=own;
   if(!(slot in slots))return '';
   const rows=typeof NEW_CUT_ROWS_4==='number'?NEW_CUT_ROWS_4:1,cut=slots[slot];
   const x=(cut%4)*100/3,y=rows>1?Math.floor(cut/4)*100/(rows-1):0;
